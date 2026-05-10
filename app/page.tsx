@@ -20,23 +20,33 @@ const facetIcons: Record<FacetId, ComponentType<SVGProps<SVGSVGElement>>> = {
   sports: Trophy,
 };
 
-const featuredTools = tools.slice(0, 3);
+const featuredTools = tools;
 
 export default function HomePage() {
   return (
     <div className="relative">
-      {/* HERO */}
-      <section className="relative overflow-hidden">
-        {/* PNW watercolor backdrop, anchored to the bottom of the hero.
-            Mask gradient at the top edge fades the image into the cream paper. */}
+      {/* HERO — note: not clipped, so the watercolor backdrop can extend down past
+          the hero and fade behind the facet cards. Circles get their own clip. */}
+      <section className="relative">
+        {/* Decorative tinted circles, clipped to the hero's bounding box. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-[440px] overflow-hidden"
+          className="pointer-events-none absolute inset-0 overflow-hidden"
+        >
+          <div className="absolute -top-32 -right-40 h-[420px] w-[420px] rounded-full bg-peach/55 blur-[2px]" />
+          <div className="absolute top-24 -left-44 h-[360px] w-[360px] rounded-full bg-sky/55 blur-[2px]" />
+        </div>
+
+        {/* PNW watercolor backdrop — extends past the hero and fades both at the
+            top (into cream paper) and at the bottom (behind the facet cards). */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[520px] translate-y-40 overflow-hidden"
           style={{
             WebkitMaskImage:
-              "linear-gradient(to bottom, transparent 0%, black 22%, black 100%)",
+              "linear-gradient(to bottom, transparent 0%, black 18%, black 55%, transparent 100%)",
             maskImage:
-              "linear-gradient(to bottom, transparent 0%, black 22%, black 100%)",
+              "linear-gradient(to bottom, transparent 0%, black 18%, black 55%, transparent 100%)",
           }}
         >
           <Image
@@ -123,7 +133,7 @@ export default function HomePage() {
                   href="/lab"
                   className="hidden items-center gap-1.5 text-[12.5px] font-medium text-forest hover:text-forest-deep sm:inline-flex"
                 >
-                  View all
+                  View all projects
                   <ArrowRight className="size-3.5" />
                 </Link>
               </header>
