@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# personal-website
 
-## Getting Started
+Mike Padden's personal AI lab site — a small collection of practical AI tools (Ashley's AI Assistant, Mariners Pulse, Wedding Countdown, AI Use Case Scorer) plus a resume and about page.
 
-First, run the development server:
+## Stack
+
+- Next.js 16 (App Router) + TypeScript
+- Tailwind CSS v4
+- shadcn/ui primitives (Button, Card, Badge)
+- Fonts: Fraunces (display), IBM Plex Sans (body), IBM Plex Mono (accents)
+
+## Develop
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Routes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `/` — Home (hero, featured tools, professional bridge)
+- `/lab` — AI Lab index of all tools
+- `/resume` — Resume / dossier
+- `/about` — About
+- `/tools/mariners-pulse` — Coming soon
+- `/tools/wedding-countdown` — Coming soon
+- `/tools/ai-use-case-scorer` — Coming soon
 
-## Learn More
+## Phases
 
-To learn more about Next.js, take a look at the following resources:
+This repo is **Phase 1** (site shell). Phases 2–4 add the live AI tools:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Phase 2 — Mariners Pulse (MLB data + AI recap)
+- Phase 3 — Wedding Countdown
+- Phase 4 — AI Use Case Scorer
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See `SPEC.md` (Website_spec.md elsewhere) for the full plan.
