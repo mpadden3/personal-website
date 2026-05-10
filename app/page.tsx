@@ -1,182 +1,283 @@
+import Image from "next/image";
 import Link from "next/link";
+import {
+  Brain,
+  Workflow,
+  MapPin,
+  Trophy,
+  TerminalSquare,
+  ArrowRight,
+} from "lucide-react";
+import type { ComponentType, SVGProps } from "react";
 import { tools } from "@/data/tools";
-import { ToolCard } from "@/components/ToolCard";
-import { SectionHeader } from "@/components/SectionHeader";
+import { facets, type FacetId } from "@/data/facets";
+import { StatusBadge } from "@/components/StatusBadge";
+
+const facetIcons: Record<FacetId, ComponentType<SVGProps<SVGSVGElement>>> = {
+  operator: Brain,
+  tpm: Workflow,
+  seattle: MapPin,
+  sports: Trophy,
+};
 
 export default function HomePage() {
   return (
     <div className="relative">
       {/* HERO */}
       <section className="relative overflow-hidden">
-        <div className="mx-auto grid max-w-6xl gap-14 px-6 pt-14 pb-20 lg:grid-cols-[1.6fr_1fr] lg:gap-12 lg:px-10 lg:pt-24 lg:pb-28">
+        {/* Soft accent circle — keeps the warm corner glow above the image */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-24 -right-32 size-[420px] rounded-full bg-peach/35 blur-[1px]"
+        />
+
+        {/* PNW watercolor backdrop, anchored to the bottom of the hero.
+            Mask gradient at the top edge fades the image into the cream paper. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[440px] overflow-hidden"
+          style={{
+            WebkitMaskImage:
+              "linear-gradient(to bottom, transparent 0%, black 22%, black 100%)",
+            maskImage:
+              "linear-gradient(to bottom, transparent 0%, black 22%, black 100%)",
+          }}
+        >
+          <Image
+            src="/hero-backdrop.png"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-bottom"
+          />
+        </div>
+
+        <div className="relative mx-auto grid max-w-6xl gap-10 px-6 pt-8 pb-12 lg:grid-cols-[1.55fr_1fr] lg:gap-12 lg:px-10 lg:pt-10 lg:pb-16">
           {/* Left column — headline */}
           <div className="relative">
-            <div className="flex items-center gap-3 text-ink-soft">
-              <span className="label-eyebrow">Issue №01</span>
-              <span className="h-px w-8 bg-ink/30" aria-hidden />
-              <span className="label-eyebrow">Seattle, WA</span>
-            </div>
+            <span className="text-[11px] font-semibold tracking-[0.22em] uppercase text-ink-soft">
+              Seattle <span className="text-forest mx-1">·</span> WA
+            </span>
 
-            <h1 className="h-display mt-8 text-[clamp(2.6rem,7vw,5.5rem)] text-ink">
-              Practical{" "}
-              <span className="display-italic text-cobalt">AI tools,</span>
+            <h1
+              className="mt-6 text-[clamp(2rem,3.4vw,3rem)] leading-[1.06] text-ink"
+              style={{
+                fontFamily: "var(--font-display), ui-serif, serif",
+                fontWeight: 400,
+                letterSpacing: "-0.02em",
+                fontVariationSettings: '"SOFT" 50, "WONK" 0, "opsz" 60',
+              }}
+            >
+              Technical Program Manager,
               <br />
-              built for real life.
+              <span
+                className="text-forest"
+                style={{
+                  fontStyle: "italic",
+                  fontVariationSettings: '"SOFT" 80, "WONK" 1, "opsz" 60',
+                }}
+              >
+                AI Operator.
+              </span>
             </h1>
 
             <p className="mt-7 max-w-xl text-[17px] leading-relaxed text-ink/85">
-              I&apos;m Mike — an AI operator and builder in Seattle, creating
-              small tools that make everyday workflows easier, from research
-              and company briefs to Mariners recaps, wedding planning, and AI
-              use case discovery.
+              I&apos;m Mike — a Seattle-based Technical Program Manager and AI
+              operator who builds simple, useful tools that save time, spark
+              ideas, and solve everyday problems at work and in life.
             </p>
 
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <Link
                 href="/lab"
-                className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-medium text-cream transition-colors hover:bg-cobalt-deep"
+                className="inline-flex items-center gap-2 rounded-full bg-forest px-6 py-3 text-[14px] font-medium text-cream transition-colors hover:bg-forest-deep"
               >
                 Explore the AI Lab
-                <span aria-hidden>→</span>
+                <ArrowRight className="size-4" />
               </Link>
               <Link
                 href="/resume"
-                className="inline-flex items-center gap-2 rounded-full bg-cream px-5 py-3 text-sm font-medium text-ink ring-1 ring-ink/30 transition-colors hover:ring-ink"
+                className="inline-flex items-center gap-2 rounded-full bg-cream px-6 py-3 text-[14px] font-medium text-ink ring-1 ring-forest/40 transition-colors hover:ring-forest"
               >
-                <span className="ink-underline">View Resume</span>
+                View Resume
               </Link>
-            </div>
-
-            {/* Decorative annotation underneath */}
-            <div className="mt-12 flex max-w-md items-start gap-3 border-l-2 border-rust/60 pl-4">
-              <span className="font-mono text-[11px] tracking-[0.2em] text-rust uppercase tabular">
-                Note ↩
-              </span>
-              <p className="marginalia">
-                These are honest, narrow tools — built because I needed them.
-                No platforms, no vague chatbots, no roadmap theater.
-              </p>
             </div>
           </div>
 
-          {/* Right column — index card */}
-          <aside className="relative lg:pl-6">
-            <div className="sticky top-24 flex flex-col gap-6 rounded-2xl border border-ink/15 bg-cream p-6 lg:p-7">
-              <header className="flex items-center justify-between border-b border-ink/10 pb-4">
-                <span className="label-eyebrow">Index</span>
-                <span className="font-mono text-[11px] text-ink-soft tabular">
-                  04 entries
-                </span>
-              </header>
-              <ol className="grid gap-4">
-                {tools.map((t) => (
-                  <li key={t.slug} className="grid gap-1">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <span className="display-italic text-[17px] text-ink">
-                        {t.name}
-                      </span>
-                      <span className="font-mono text-[10px] tracking-[0.18em] text-ink-soft uppercase tabular">
-                        № {t.index}
-                      </span>
-                    </div>
-                    <p className="text-[12.5px] leading-snug text-ink-soft">
-                      {t.kicker}
+          {/* Right column — Featured Projects card */}
+          <aside>
+            <div className="rounded-2xl border border-forest/35 bg-cream/95 p-5 shadow-[0_24px_60px_-32px_oklch(0.36_0.06_185/0.35)] lg:p-6">
+              {/* Card header */}
+              <header className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <span className="flex size-12 items-center justify-center rounded-full bg-forest/[0.1] text-forest">
+                    <TerminalSquare className="size-5" strokeWidth={1.6} />
+                  </span>
+                  <div>
+                    <h2 className="h-display text-[22px] leading-tight text-ink">
+                      Featured Projects
+                    </h2>
+                    <p className="mt-1 text-[13px] text-ink-soft">
+                      What I&apos;m building
                     </p>
+                  </div>
+                </div>
+                <Link
+                  href="/lab"
+                  className="hidden items-center gap-1.5 text-[13px] font-medium text-forest hover:text-forest-deep sm:inline-flex"
+                >
+                  View all projects
+                  <ArrowRight className="size-3.5" />
+                </Link>
+              </header>
+
+              {/* Project rows */}
+              <ol className="mt-5 grid divide-y divide-forest/15">
+                {tools.map((t) => (
+                  <li key={t.slug} className="grid grid-cols-[28px_1fr_auto] items-center gap-4 py-3 first:pt-1.5">
+                    <span className="font-medium text-[13px] tabular text-forest tracking-wide">
+                      {t.index}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="h-display text-[18px] leading-snug text-ink">
+                        {t.name}
+                      </p>
+                      <p className="mt-0.5 text-[13px] leading-snug text-ink-soft">
+                        {t.tagline}
+                      </p>
+                    </div>
+                    <StatusBadge status={t.status} />
                   </li>
                 ))}
               </ol>
-              <div className="border-t border-ink/10 pt-4">
+
+              {/* Mobile-only "view all" footer link */}
+              <div className="mt-2 border-t border-forest/15 pt-4 sm:hidden">
                 <Link
                   href="/lab"
-                  className="group inline-flex items-center justify-between gap-2 text-[12.5px] font-medium text-cobalt"
+                  className="inline-flex items-center gap-1.5 text-[13px] font-medium text-forest"
                 >
-                  <span className="ink-underline">Read the full lab</span>
-                  <span aria-hidden>→</span>
+                  View all projects
+                  <ArrowRight className="size-3.5" />
                 </Link>
               </div>
             </div>
           </aside>
         </div>
-
-        {/* Decorative ruler tick */}
-        <div className="mx-auto max-w-6xl px-6 lg:px-10">
-          <div className="rule" />
-        </div>
       </section>
 
-      {/* FEATURED EXPERIMENTS */}
-      <section className="mx-auto max-w-6xl px-6 py-20 lg:px-10 lg:py-28">
-        <SectionHeader
-          index="01"
-          eyebrow="Featured experiments"
-          title={
-            <>
-              Four small tools, in various{" "}
-              <span className="display-italic text-cobalt">states of done</span>.
-            </>
-          }
-          description="A live deep research assistant, a Mariners tracker still being shaped, and two more in the workshop."
-        />
-        <div className="mt-12 grid gap-5 sm:grid-cols-2">
-          {tools.map((t) => (
-            <ToolCard key={t.slug} tool={t} variant="feature" />
-          ))}
-        </div>
-      </section>
-
-      {/* PROFESSIONAL BRIDGE */}
-      <section className="mx-auto max-w-6xl px-6 pb-24 lg:px-10 lg:pb-32">
-        <div className="grid gap-10 rounded-3xl bg-ink p-8 text-cream sm:p-12 lg:grid-cols-[1.2fr_1fr] lg:p-16">
-          <div className="grid gap-5">
-            <span className="label-eyebrow text-cream/60">
-              Professionally
-            </span>
-            <p className="pull-quote text-[clamp(1.6rem,3.5vw,2.6rem)]">
-              I work at the intersection of{" "}
-              <span className="display-italic text-rust">AI delivery</span>,
-              business workflows, and adoption — helping teams move from AI
-              ideas to usable products and{" "}
-              <span className="display-italic">measurable outcomes</span>.
-            </p>
-          </div>
-          <div className="grid content-end gap-4">
-            <div className="grid grid-cols-2 gap-3 text-[12px] tracking-wide text-cream/70">
-              {[
-                "AI delivery",
-                "Adoption",
-                "Agentic workflows",
-                "Stakeholder alignment",
-              ].map((label) => (
-                <div
-                  key={label}
-                  className="flex items-center gap-2 rounded-md border border-cream/15 px-3 py-2 font-mono uppercase"
+      {/* FACETS — four cards: AI Operator / TPM / Seattle / Sports */}
+      <section className="relative">
+        <div className="mx-auto max-w-6xl px-6 pb-16 lg:px-10 lg:pb-20">
+          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {facets.map((f) => {
+              const Icon = facetIcons[f.id];
+              return (
+                <li
+                  key={f.id}
+                  className="group relative overflow-hidden rounded-2xl border border-forest/30 bg-cream/95 p-6 transition-shadow hover:shadow-[0_18px_40px_-28px_oklch(0.36_0.06_185/0.40)]"
                 >
+                  <FacetDecoration id={f.id} />
+                  <header className="relative flex items-center gap-4">
+                    <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-forest/[0.1] text-forest">
+                      <Icon className="size-5" strokeWidth={1.6} />
+                    </span>
+                    <h3 className="h-display text-[20px] leading-tight text-ink">
+                      {f.label}
+                    </h3>
+                  </header>
+                  <p className="relative mt-4 max-w-[20ch] text-[14px] leading-relaxed text-ink/80">
+                    {f.body}
+                  </p>
+                  {/* Tiny accent rule, like the wireframe */}
                   <span
-                    className="size-1.5 rounded-full bg-rust"
                     aria-hidden
+                    className="relative mt-5 block h-[1.5px] w-10 rounded-full bg-forest/60"
                   />
-                  {label}
-                </div>
-              ))}
-            </div>
-            <div className="flex flex-wrap gap-3 pt-2">
-              <Link
-                href="/resume"
-                className="inline-flex items-center gap-2 rounded-full bg-cream px-4 py-2.5 text-[13px] font-medium text-ink hover:bg-cream/90"
-              >
-                Read the resume
-                <span aria-hidden>→</span>
-              </Link>
-              <Link
-                href="/about"
-                className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[13px] font-medium text-cream ring-1 ring-cream/30 hover:ring-cream"
-              >
-                <span className="ink-underline">About me</span>
-              </Link>
-            </div>
-          </div>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </section>
     </div>
   );
+}
+
+/* ---------------------------------------------------------------
+ * FacetDecoration — tiny hand-drawn-feel inline SVG anchored to the
+ * bottom-right of each facet card. Single forest color at low opacity,
+ * matches the PNW backdrop vocabulary.
+ * --------------------------------------------------------------- */
+function FacetDecoration({ id }: { id: FacetId }) {
+  const common = (
+    <span
+      aria-hidden
+      className="pointer-events-none absolute -bottom-2 -right-2 h-28 w-32 text-forest opacity-[0.22]"
+    >
+      <svg
+        viewBox="0 0 140 120"
+        className="h-full w-full"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        {id === "operator" && (
+          // Laptop with a tiny bar chart
+          <>
+            <path d="M 25 80 L 115 80 L 110 50 L 30 50 Z" />
+            <path d="M 18 88 L 122 88 L 118 80 L 22 80 Z" />
+            <g strokeWidth="1.2">
+              <path d="M 45 70 L 45 60" />
+              <path d="M 60 70 L 60 55" />
+              <path d="M 75 70 L 75 50" />
+              <path d="M 90 70 L 90 58" />
+            </g>
+            <path d="M 40 70 L 100 70" strokeWidth="1.1" opacity="0.5" />
+          </>
+        )}
+        {id === "tpm" && (
+          // Connected nodes — workflow / network graph
+          <>
+            <circle cx="35" cy="40" r="5" />
+            <circle cx="95" cy="35" r="5" />
+            <circle cx="65" cy="75" r="5" />
+            <circle cx="115" cy="80" r="5" />
+            <path d="M 40 42 L 90 36" />
+            <path d="M 38 45 L 62 72" />
+            <path d="M 70 75 L 110 80" />
+            <path d="M 95 40 L 70 70" />
+          </>
+        )}
+        {id === "seattle" && (
+          // Mini Seattle skyline + space needle
+          <>
+            <rect x="20" y="60" width="14" height="32" />
+            <rect x="38" y="50" width="18" height="42" />
+            <rect x="60" y="65" width="12" height="27" />
+            <rect x="76" y="45" width="20" height="47" />
+            <rect x="100" y="58" width="14" height="34" />
+            {/* mini space needle */}
+            <path d="M 122 92 L 125 60" />
+            <path d="M 132 92 L 129 60" />
+            <path d="M 121 60 Q 127 54 133 60 Q 127 64 121 60 Z" />
+            <path d="M 127 54 L 127 42" />
+          </>
+        )}
+        {id === "sports" && (
+          // Mountain ridge + baseball
+          <>
+            <path d="M 10 95 L 35 60 L 55 80 L 75 50 L 95 75 L 130 95 Z" fill="currentColor" fillOpacity="0.08" />
+            <circle cx="115" cy="40" r="11" />
+            <path d="M 107 35 Q 115 42 123 35" strokeWidth="1.1" opacity="0.7" />
+            <path d="M 107 45 Q 115 38 123 45" strokeWidth="1.1" opacity="0.7" />
+          </>
+        )}
+      </svg>
+    </span>
+  );
+  return common;
 }

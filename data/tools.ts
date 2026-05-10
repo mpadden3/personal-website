@@ -5,6 +5,8 @@ export type Tool = {
   index: string; // editorial number, e.g. "01"
   name: string;
   status: ToolStatus;
+  /** Ultra-short one-line summary used on the home Featured Projects card */
+  tagline: string;
   shortDescription: string;
   description: string;
   tags: string[];
@@ -22,6 +24,7 @@ export const tools: Tool[] = [
     name: "Ashley's AI Assistant",
     status: "live",
     kicker: "Deep research, with manners.",
+    tagline: "Personal assistant for everyday life",
     shortDescription:
       "A research assistant that asks before it answers, then returns structured briefs.",
     description:
@@ -44,6 +47,7 @@ export const tools: Tool[] = [
     name: "Mariners Pulse",
     status: "in-progress",
     kicker: "Five games, one read on the season.",
+    tagline: "Real-time game & roster insights",
     shortDescription:
       "Last five Mariners games, recapped — plus Mike's Player of the Week.",
     description:
@@ -59,6 +63,7 @@ export const tools: Tool[] = [
     name: "Wedding Countdown Assistant",
     status: "planned",
     kicker: "T-minus the rest of our lives.",
+    tagline: "Planning, checklists, and timelines",
     shortDescription:
       "Countdown and lightweight planning helper for June 19, 2027.",
     description:
@@ -74,6 +79,7 @@ export const tools: Tool[] = [
     name: "AI Use Case Scorer",
     status: "planned",
     kicker: "Is this actually a job for AI?",
+    tagline: "Score and prioritize AI opportunities",
     shortDescription:
       "Score a workflow on AI fit, value, complexity, data, risk, and MVP shape.",
     description:

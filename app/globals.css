@@ -17,6 +17,19 @@
   --color-sage: var(--sage);
   --color-amber-status: var(--amber-status);
   --color-rule: var(--rule);
+  /* Pacific NW color-block palette */
+  --color-teal: var(--teal);
+  --color-teal-deep: var(--teal-deep);
+  --color-rainier: var(--rainier);
+  --color-mustard: var(--mustard);
+  --color-pine: var(--pine);
+  /* New refined tokens */
+  --color-forest: var(--forest);
+  --color-forest-deep: var(--forest-deep);
+  --color-forest-soft: var(--forest-soft);
+  --color-peach: var(--peach);
+  --color-sky: var(--sky);
+  --color-slate-status: var(--slate-status);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-display: var(--font-display);
@@ -60,17 +73,29 @@
 }
 
 :root {
-  /* Editorial Workshop palette */
-  --cream: oklch(0.965 0.014 82);          /* warm paper */
-  --cream-deep: oklch(0.945 0.018 78);     /* slightly aged paper */
-  --ink: oklch(0.205 0.045 250);           /* deep midnight navy */
-  --ink-soft: oklch(0.36 0.04 250);        /* softer ink for secondary text */
-  --cobalt: oklch(0.46 0.17 258);          /* rich interactive cobalt */
-  --cobalt-deep: oklch(0.36 0.16 258);     /* hover/pressed cobalt */
-  --rust: oklch(0.58 0.155 42);            /* warm terracotta accent */
-  --sage: oklch(0.55 0.085 155);           /* muted sage for "Live" */
-  --amber-status: oklch(0.66 0.135 70);    /* warm amber for "In Progress" */
-  --rule: oklch(0.205 0.045 250 / 0.18);   /* hairline rules */
+  /* PNW palette — refined to match the wireframe direction */
+  --cream: oklch(0.965 0.018 78);          /* warm eggshell paper */
+  --cream-deep: oklch(0.94 0.022 76);      /* slightly aged paper */
+  --ink: oklch(0.22 0.045 240);            /* deep navy/charcoal text */
+  --ink-soft: oklch(0.42 0.035 235);       /* softer ink for secondary text */
+  --forest: oklch(0.36 0.06 185);          /* primary deep forest teal */
+  --forest-deep: oklch(0.28 0.06 185);     /* hover/pressed deep forest */
+  --forest-soft: oklch(0.55 0.06 185);     /* lighter forest accent for kickers */
+  --peach: oklch(0.91 0.06 65);            /* soft sunrise peach circle */
+  --sky: oklch(0.88 0.04 220);             /* soft pacific sky blue circle */
+  --sage: oklch(0.55 0.085 155);           /* muted sage for "Live" status dot */
+  --amber-status: oklch(0.68 0.14 65);     /* warm amber for "In Progress" */
+  --slate-status: oklch(0.62 0.025 250);   /* cool slate for "Planned" */
+  --rule: oklch(0.36 0.06 185 / 0.22);     /* forest-tinted hairline rules */
+  /* Legacy tokens kept so other pages don't break; will retire on next pass */
+  --cobalt: var(--forest);
+  --cobalt-deep: var(--forest-deep);
+  --rust: oklch(0.58 0.155 42);
+  --teal: var(--forest);
+  --teal-deep: var(--forest-deep);
+  --rainier: var(--sky);
+  --mustard: var(--peach);
+  --pine: var(--forest);
 
   /* shadcn mapping */
   --background: var(--cream);
@@ -79,7 +104,7 @@
   --card-foreground: var(--ink);
   --popover: oklch(0.985 0.008 82);
   --popover-foreground: var(--ink);
-  --primary: var(--ink);
+  --primary: var(--forest);
   --primary-foreground: var(--cream);
   --secondary: oklch(0.93 0.018 82);
   --secondary-foreground: var(--ink);
@@ -208,5 +233,58 @@
     font-variation-settings: "SOFT" 80, "WONK" 1, "opsz" 144;
     letter-spacing: -0.012em;
     line-height: 1.15;
+  }
+
+  /* Riso misregistration effect — duplicate text offset in a contrasting color.
+     Use display:inline-block + nowrap so the ghost stays anchored to its phrase
+     and doesn't fragment when the parent line wraps. */
+  .riso-shift {
+    position: relative;
+    display: inline-block;
+    white-space: nowrap;
+    isolation: isolate;
+  }
+  .riso-shift::before {
+    content: attr(data-shadow);
+    position: absolute;
+    inset: 0;
+    transform: translate(6px, 4px);
+    color: var(--rust);
+    z-index: -1;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+    opacity: 0.85;
+  }
+
+  /* Marquee scrolling strip */
+  @keyframes marquee-slide {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee-slide 32s linear infinite;
+  }
+  .marquee-pause:hover .marquee-track {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track { animation: none; }
+  }
+
+  /* Riso-stamp seal — small chunky rotated badge */
+  .stamp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transform: rotate(-3deg);
+    font-family: var(--font-mono), ui-monospace, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    border: 2px solid currentColor;
+    padding: 0.4rem 0.7rem;
+    font-size: 10.5px;
+    border-radius: 4px;
   }
 }
