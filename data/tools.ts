@@ -45,7 +45,7 @@ export const tools: Tool[] = [
     slug: "mariners-pulse",
     index: "02",
     name: "Mariners Pulse",
-    status: "in-progress",
+    status: "live",
     kicker: "Five games, one read on the season.",
     tagline: "Real-time game & roster insights",
     shortDescription:
