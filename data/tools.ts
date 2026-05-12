@@ -77,16 +77,16 @@ export const tools: Tool[] = [
     slug: "ai-use-case-scorer",
     index: "04",
     name: "AI Use Case Scorer",
-    status: "planned",
+    status: "live",
     kicker: "Is this actually a job for AI?",
     tagline: "Score and prioritize AI opportunities",
     shortDescription:
-      "Score a workflow on AI fit, value, complexity, data, risk, and MVP shape.",
+      "Score an AI use case on helpfulness, novelty, value, and feasibility — with a generated wireframe.",
     description:
-      "A tool that evaluates whether a workflow is a good candidate for AI and returns value, complexity, data needs, risks, MVP recommendation, and success metrics.",
-    tags: ["AI outcomes", "Workflow analysis", "Adoption", "MVP planning"],
+      "Describe a use case and the scorer asks a clarifying question or two, searches the web for tools that already exist, returns a four-axis score with a verdict, and sketches a quick wireframe of what the application could look like.",
+    tags: ["AI evaluation", "EXA web search", "Image generation", "Decision support"],
     href: "/tools/ai-use-case-scorer",
-    cta: "Coming Soon",
+    cta: "View",
     external: false,
   },
 ];

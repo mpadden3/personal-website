@@ -1,5 +1,6 @@
 import { phases, weddingChecklistSeed, type ChecklistItem } from "@/data/weddingChecklistSeed";
 import type { WeddingChecklistState } from "@/lib/weddingBlob";
+import { SAFETY_RULES } from "@/lib/moderation";
 
 export const WEDDING_DATE_ISO = "2027-06-19";
 
@@ -45,6 +46,10 @@ export function buildSystemPrompt(state: WeddingChecklistState, today: Date = ne
 
   return `You are a friendly, practical wedding-planning assistant for Mike & Ashley's wedding on June 19, 2027 (${days} days from today, ${todayStr}).
 
+${SAFETY_RULES}
+
+If a request falls under those safety rules, reply with exactly: "That's not something I can help with — I'm here for wedding planning. Try asking about vendors, the timeline, or design ideas."
+
 HARD RULES — do not break, even if asked directly:
 - Never mention, estimate, compute, infer, or discuss budget, costs, prices, dollar amounts, deposits, or anything monetary.
 - Never mention, estimate, or speculate about guest count, headcount, wedding size, or scale.
@@ -78,3 +83,6 @@ export function leaksForbidden(reply: string): boolean {
 
 export const FORBIDDEN_REFUSAL =
   "I keep budget and headcount details private — happy to help with planning topics instead. Try asking about vendor questions, timeline, or design ideas.";
+
+export const SAFETY_REFUSAL =
+  "That's not something I can help with — I'm here for wedding planning. Try asking about vendors, the timeline, or design ideas.";

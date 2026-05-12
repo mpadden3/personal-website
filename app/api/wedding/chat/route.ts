@@ -3,9 +3,11 @@ import { getWeddingState } from "@/lib/weddingBlob";
 import {
   buildSystemPrompt,
   FORBIDDEN_REFUSAL,
+  SAFETY_REFUSAL,
   leaksForbidden,
 } from "@/lib/weddingChatPrompt";
 import { exaSearch, type ExaResult } from "@/lib/exa";
+import { checkContent } from "@/lib/moderation";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -79,6 +81,16 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const latestUser = incoming[incoming.length - 1].content;
+
+  // Content safety layer 1 — moderate the latest user message before
+  // anything else. If flagged, refuse with the canned safety redirect.
+  // checkContent returns null if OPENAI_API_KEY isn't configured; in that
+  // case we proceed (graceful degradation).
+  const inputSafe = await checkContent(latestUser);
+  if (inputSafe === false) {
+    return Response.json({ ok: true, reply: SAFETY_REFUSAL, sources: [] });
+  }
+
   if (userInputLooksForbidden(latestUser)) {
     return Response.json({ ok: true, reply: FORBIDDEN_REFUSAL, sources: [] });
   }
@@ -151,9 +163,9 @@ export async function POST(request: Request): Promise<Response> {
         { status: 503 },
       );
     }
-    const reply = leaksForbidden(second.content) ? FORBIDDEN_REFUSAL : second.content;
-    const sources = dedupeSources(collectedSources);
-    return Response.json({ ok: true, reply, sources });
+    const safeReply = await finalizeReply(second.content);
+    const sources = safeReply === SAFETY_REFUSAL ? [] : dedupeSources(collectedSources);
+    return Response.json({ ok: true, reply: safeReply, sources });
   }
 
   // No tool call — direct answer.
@@ -163,8 +175,18 @@ export async function POST(request: Request): Promise<Response> {
       { status: 503 },
     );
   }
-  const reply = leaksForbidden(first.content) ? FORBIDDEN_REFUSAL : first.content;
-  return Response.json({ ok: true, reply, sources: [] });
+  const safeReply = await finalizeReply(first.content);
+  return Response.json({ ok: true, reply: safeReply, sources: [] });
+}
+
+// Final defense-in-depth on the model's output: topic guardrail first
+// (budget/headcount leak), then content moderation. Either trip swaps the
+// reply with a canned redirect so nothing unsafe ever reaches the client.
+async function finalizeReply(raw: string): Promise<string> {
+  if (leaksForbidden(raw)) return FORBIDDEN_REFUSAL;
+  const safe = await checkContent(raw);
+  if (safe === false) return SAFETY_REFUSAL;
+  return raw;
 }
 
 function dedupeSources(sources: ExaResult[]): { title: string; url: string }[] {

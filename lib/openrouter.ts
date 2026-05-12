@@ -14,6 +14,7 @@ type ChatJSONOpts<T> = {
   validate: (parsed: unknown) => T | null;
   maxTokens?: number;
   temperature?: number;
+  timeoutMs?: number;
 };
 
 export type ChatMessage =
@@ -142,7 +143,7 @@ export async function chatJSON<T>(opts: ChatJSONOpts<T>): Promise<T | null> {
   };
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 15000);
+  const timer = setTimeout(() => controller.abort(), opts.timeoutMs ?? 15000);
   try {
     const res = await fetch(ENDPOINT, {
       method: "POST",

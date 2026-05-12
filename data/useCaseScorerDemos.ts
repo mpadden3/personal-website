@@ -1,0 +1,279 @@
+import type { ScoreRecord } from "@/lib/useCaseScorer";
+
+// Hand-curated example score records shown on the landing page and reachable
+// via /tools/ai-use-case-scorer/[id]. These are NOT persisted in Vercel Blob;
+// the result page falls back to this constant when the ID matches.
+//
+// Picking a deliberate spread: one strong candidate, one commodity, one
+// wrong-tool-for-the-job, one feasibility trap. The composite values below
+// are math from the axis scores using the same weights the runtime applies.
+
+const NOW = "2026-05-12T00:00:00.000Z";
+
+export const demoScores: ScoreRecord[] = [
+  {
+    id: "dsalbri",
+    createdAt: NOW,
+    input: {
+      description:
+        "A Monday-morning brief for the head of sales: pulls the weekly pipeline movement from Salesforce, highlights deals that slipped, names the three reps who need attention, and ships as a slide in their inbox at 7am.",
+      clarifications: [
+        {
+          question: "Who would read this brief?",
+          answer:
+            "The VP of Sales, weekly. They currently spend 30–60 minutes prepping their own version every Sunday.",
+        },
+      ],
+    },
+    scores: {
+      helpfulness: {
+        value: 9,
+        rationale:
+          "Sunday-night pipeline prep is a real, recurring pain for sales leaders. Replacing it with a deterministic brief reclaims 30+ minutes weekly and reduces last-minute scrambling.",
+      },
+      novelty: {
+        value: 6,
+        rationale:
+          "Generic AI sales-prep tools exist (Gong, Clari Copilot), but a tailored one-page brief slotted into an existing workflow is still uncommon and most teams roll their own.",
+      },
+      value: {
+        value: 8,
+        rationale:
+          "Direct time savings for a senior IC plus better-prepared sales reviews. Compounds across the org if the format is adopted by other managers.",
+      },
+      feasibility: {
+        value: 8,
+        rationale:
+          "Salesforce has a clean API, the data shape is well understood, and the AI step is just summarization with structured inputs. A weekend prototype is realistic.",
+      },
+    },
+    composite: 81,
+    band: "build",
+    verdictTagline: "Strong candidate — build a scoped pilot first.",
+    summary:
+      "Real pain, willing user, achievable scope. The risk is over-scoping to please everyone; lock the audience to one VP and ship in two weeks.",
+    comparables: [
+      {
+        title: "Clari Copilot",
+        url: "https://www.clari.com/products/copilot/",
+        note: "AI assistant for revenue teams; broader than a single brief but covers the underlying analysis.",
+      },
+      {
+        title: "Gong AI",
+        url: "https://www.gong.io/platform/ai/",
+        note: "Revenue intelligence with AI-generated summaries; positioned at conversation data, not pipeline movement.",
+      },
+    ],
+    nextSteps: [
+      "Shadow one Sunday brief prep to capture the exact format.",
+      "Wire a single Salesforce report into a Claude summarization step.",
+      "Ship a static-table v0 to the VP for two weeks.",
+      "Measure: time-to-prep before vs after.",
+      "Decide on widening only after the VP keeps reading it.",
+    ],
+    appOneLiner:
+      "A clean Monday-morning brief showing pipeline movement, slipped deals, and three reps to focus on this week.",
+  },
+  {
+    id: "dmailsum",
+    createdAt: NOW,
+    input: {
+      description:
+        "An AI tool that summarizes long emails into one-paragraph briefs so busy professionals can triage their inbox faster.",
+      clarifications: [],
+    },
+    scores: {
+      helpfulness: {
+        value: 7,
+        rationale:
+          "Email triage is a real, widely-felt pain. The benefit is incremental more than transformational because most users adapt their reading habits naturally.",
+      },
+      novelty: {
+        value: 2,
+        rationale:
+          "This already ships in Gmail (Gemini), Outlook (Copilot), Superhuman, Notion AI, and most native mail clients. The space is saturated with free or bundled options.",
+      },
+      value: {
+        value: 3,
+        rationale:
+          "Time savings are minutes per day at most, and existing free tools already capture that value. Marginal ROI to build from scratch.",
+      },
+      feasibility: {
+        value: 9,
+        rationale:
+          "Technically trivial — one model call per message. The hard parts are email-client integration and OAuth, not the AI.",
+      },
+    },
+    composite: 59,
+    band: "narrow",
+    verdictTagline: "Already free in your email client — skip or pivot.",
+    summary:
+      "This is a solved problem at the platform level. Building it standalone competes with free, deeply-integrated incumbents. Pivot to a sharper niche (e.g. customer-support inbox summarization) or skip.",
+    comparables: [
+      {
+        title: "Gmail with Gemini",
+        url: "https://workspace.google.com/solutions/ai/",
+        note: "Native AI summarization in Gmail for Workspace users at no extra cost.",
+      },
+      {
+        title: "Microsoft Copilot for Outlook",
+        url: "https://www.microsoft.com/en-us/microsoft-365/copilot",
+        note: "Inline email summaries and draft assistance in Outlook.",
+      },
+      {
+        title: "Superhuman AI",
+        url: "https://superhuman.com/ai",
+        note: "Premium email client with AI summarization built in.",
+      },
+    ],
+    nextSteps: [
+      "List which inbox segment is actually under-served today.",
+      "Talk to three people in that segment about their workaround.",
+      "If they're paying for a workaround, that's the v1.",
+      "If they're not, abandon and find a different problem.",
+    ],
+    appOneLiner:
+      "A clean reading view that condenses a long email thread into a one-paragraph brief with action items beneath.",
+  },
+  {
+    id: "dnatsql",
+    createdAt: NOW,
+    input: {
+      description:
+        "Let the finance team ask natural-language questions of the data warehouse and get accurate answers without writing SQL.",
+      clarifications: [
+        {
+          question: "What kinds of questions would they ask?",
+          answer:
+            "Things like 'how much did we spend on AWS last quarter by region' or 'show me revenue by customer segment for FY24'.",
+        },
+        {
+          question: "Who is actually blocked today?",
+          answer:
+            "Mostly two analysts who batch finance questions and respond within a day or two. The finance team works around it.",
+        },
+      ],
+    },
+    scores: {
+      helpfulness: {
+        value: 5,
+        rationale:
+          "There's a real wait, but it's hours not weeks. The finance team has adapted and the analysts batch their work, so removing the bottleneck isn't transformative.",
+      },
+      novelty: {
+        value: 4,
+        rationale:
+          "ThoughtSpot, Hex Magic, Julius AI, and OpenAI's data-analysis features all target this. The space is well-trodden, even if no single tool is dominant inside finance teams.",
+      },
+      value: {
+        value: 4,
+        rationale:
+          "Time savings are real but bounded. The actual risk is wrong answers — finance teams need precision and natural-language SQL still misreads schemas on ambiguous questions.",
+      },
+      feasibility: {
+        value: 3,
+        rationale:
+          "Production-grade NL→SQL is hard. Schema descriptions, joins, fiscal-period math, and confident-but-wrong answers all bite. A demo is easy; a trustworthy tool is a multi-quarter project.",
+      },
+    },
+    composite: 40,
+    band: "narrow",
+    verdictTagline: "Tempting demo, treacherous in production.",
+    summary:
+      "The risk-adjusted value is low. Buy a vetted tool like Hex or ThoughtSpot before considering building this internally, and only after confirming the analyst bottleneck is actually blocking decisions.",
+    comparables: [
+      {
+        title: "Hex Magic",
+        url: "https://hex.tech/product/magic-ai/",
+        note: "Natural-language data exploration inside Hex notebooks; trusted by analyst teams.",
+      },
+      {
+        title: "ThoughtSpot Sage",
+        url: "https://www.thoughtspot.com/product/sage",
+        note: "BI tool with natural-language querying; targets finance and operations users specifically.",
+      },
+      {
+        title: "Julius AI",
+        url: "https://julius.ai/",
+        note: "Conversational data analysis on uploaded files or connected warehouses.",
+      },
+    ],
+    nextSteps: [
+      "Quantify the actual analyst wait time across one quarter.",
+      "Run a one-week pilot of Hex Magic with the finance team.",
+      "If the pilot replaces 60%+ of analyst tickets, buy it.",
+      "If not, the problem isn't query latency — it's something else.",
+    ],
+    appOneLiner:
+      "A simple question box above a results table, with a clear panel showing the generated query and a confidence rating.",
+  },
+  {
+    id: "dlegal",
+    createdAt: NOW,
+    input: {
+      description:
+        "A real-time legal advice agent for small business owners — answers questions about contracts, employment law, and compliance in plain English with cited sources.",
+      clarifications: [
+        {
+          question: "Who is the target user?",
+          answer:
+            "Sole proprietors and small-business owners (1–20 employees) without in-house counsel.",
+        },
+        {
+          question: "What would success look like?",
+          answer:
+            "They feel confident handling routine legal questions without paying $400/hour to a lawyer, and know when to escalate.",
+        },
+      ],
+    },
+    scores: {
+      helpfulness: {
+        value: 8,
+        rationale:
+          "Small-business owners genuinely struggle with routine legal questions and avoid lawyers because of cost. Real, widely-felt pain.",
+      },
+      novelty: {
+        value: 6,
+        rationale:
+          "DoNotPay and LegalZoom AI exist but cover narrow slices; a comprehensive small-business legal copilot is a thinner field, though regulatory pressure is rising.",
+      },
+      value: {
+        value: 7,
+        rationale:
+          "Significant if it works — but the value is bounded by liability concerns. Users will under-trust it for the exact questions where it matters most.",
+      },
+      feasibility: {
+        value: 2,
+        rationale:
+          "Legal accuracy, jurisdiction-specific variation, ongoing law changes, and unauthorized-practice-of-law risk make this a multi-year project. A weekend hack would be irresponsible.",
+      },
+    },
+    composite: 57,
+    band: "narrow",
+    verdictTagline: "Right problem, wrong project for a small team.",
+    summary:
+      "The pain is real and the demand is there, but the regulatory and liability burden make this a hard, slow build that needs legal partnerships. Narrow to one jurisdiction and one document type, or skip.",
+    comparables: [
+      {
+        title: "DoNotPay",
+        url: "https://donotpay.com/",
+        note: "Consumer-focused legal AI; recently scaled back claims after FTC scrutiny — a cautionary tale on this exact space.",
+      },
+      {
+        title: "Harvey AI",
+        url: "https://www.harvey.ai/",
+        note: "AI for enterprise legal — sells to law firms, not directly to small businesses.",
+      },
+    ],
+    nextSteps: [
+      "Pick one jurisdiction (e.g. Washington State) and one doc type (e.g. employee offer letters).",
+      "Partner with a paralegal to vet outputs for one month.",
+      "Ship a paid waitlist; gate the product behind verified small-business email.",
+      "Reassess only after 50 paying users use it weekly.",
+    ],
+    appOneLiner:
+      "A focused question-and-answer view with cited references on the side and a prominent 'escalate to a lawyer' option.",
+  },
+];
+
+export const demoScoresById = new Map(demoScores.map((d) => [d.id, d]));
