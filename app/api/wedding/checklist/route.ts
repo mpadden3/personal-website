@@ -20,9 +20,12 @@ type GetResponse = {
 };
 
 function mergeItems(state: WeddingChecklistState): ChecklistItem[] {
-  return [...weddingChecklistSeed, ...state.custom].map((it) => {
-    const override = state.phaseOverrides[it.id];
-    return override ? { ...it, phase: override } : it;
+  const deleted = new Set(state.deletedSeedIds);
+  const visibleSeed = weddingChecklistSeed.filter((s) => !deleted.has(s.id));
+  return [...visibleSeed, ...state.custom].map((it) => {
+    const phase = state.phaseOverrides[it.id] ?? it.phase;
+    const label = state.labelOverrides[it.id] ?? it.label;
+    return { ...it, phase, label };
   });
 }
 
@@ -36,7 +39,8 @@ type ToggleAction = { type: "toggle"; id: string };
 type AddAction = { type: "add"; label: string; phase: PhaseKey };
 type RemoveAction = { type: "remove"; id: string };
 type MoveAction = { type: "move"; id: string; toPhase: PhaseKey };
-type Action = ToggleAction | AddAction | RemoveAction | MoveAction;
+type EditAction = { type: "edit"; id: string; label: string };
+type Action = ToggleAction | AddAction | RemoveAction | MoveAction | EditAction;
 
 const PHASE_SET = new Set(phases.map((p) => p.key));
 
@@ -67,6 +71,16 @@ function parseAction(body: unknown): Action | null {
     PHASE_SET.has(b.toPhase as PhaseKey)
   ) {
     return { type: "move", id: b.id, toPhase: b.toPhase as PhaseKey };
+  }
+  if (
+    b.type === "edit" &&
+    typeof b.id === "string" &&
+    b.id.length < 200 &&
+    typeof b.label === "string" &&
+    b.label.trim().length > 0 &&
+    b.label.length <= 200
+  ) {
+    return { type: "edit", id: b.id, label: b.label.trim() };
   }
   return null;
 }
@@ -111,14 +125,28 @@ export async function POST(request: Request): Promise<Response> {
       return { ...current, custom: [...current.custom, item] };
     }
     if (action.type === "remove") {
-      // Only custom items can be removed.
-      if (seedIds.has(action.id)) return current;
-      const custom = current.custom.filter((c) => c.id !== action.id);
       const checked = { ...current.checked };
       delete checked[action.id];
       const phaseOverrides = { ...current.phaseOverrides };
       delete phaseOverrides[action.id];
-      return { ...current, custom, checked, phaseOverrides };
+      const labelOverrides = { ...current.labelOverrides };
+      delete labelOverrides[action.id];
+      if (seedIds.has(action.id)) {
+        // Seed item — hide via deletedSeedIds rather than mutate the seed file.
+        const deletedSeedIds = current.deletedSeedIds.includes(action.id)
+          ? current.deletedSeedIds
+          : [...current.deletedSeedIds, action.id];
+        return {
+          ...current,
+          checked,
+          phaseOverrides,
+          labelOverrides,
+          deletedSeedIds,
+        };
+      }
+      // Custom item — drop from the array.
+      const custom = current.custom.filter((c) => c.id !== action.id);
+      return { ...current, custom, checked, phaseOverrides, labelOverrides };
     }
     if (action.type === "move") {
       const customIds = new Set(current.custom.map((c) => c.id));
@@ -140,6 +168,29 @@ export async function POST(request: Request): Promise<Response> {
         phaseOverrides[action.id] = action.toPhase;
       }
       return { ...current, custom, phaseOverrides };
+    }
+    if (action.type === "edit") {
+      const customIds = new Set(current.custom.map((c) => c.id));
+      if (!seedIds.has(action.id) && !customIds.has(action.id)) return current;
+      // For seed items, store an override. Clear it if the user edited back
+      // to the original label.
+      const labelOverrides = { ...current.labelOverrides };
+      let custom = current.custom;
+      if (seedIds.has(action.id)) {
+        const seed = weddingChecklistSeed.find((s) => s.id === action.id);
+        if (seed && seed.label === action.label) {
+          delete labelOverrides[action.id];
+        } else {
+          labelOverrides[action.id] = action.label;
+        }
+      } else {
+        // Custom items live in `custom` directly — also mirror to overrides
+        // for consistency with the merge logic.
+        custom = current.custom.map((c) =>
+          c.id === action.id ? { ...c, label: action.label } : c,
+        );
+      }
+      return { ...current, custom, labelOverrides };
     }
     return current;
   });

@@ -10,9 +10,12 @@ export function daysUntilWedding(today: Date = new Date()): number {
 }
 
 function mergeItems(state: WeddingChecklistState): ChecklistItem[] {
-  return [...weddingChecklistSeed, ...state.custom].map((it) => {
-    const override = state.phaseOverrides[it.id];
-    return override ? { ...it, phase: override } : it;
+  const deleted = new Set(state.deletedSeedIds);
+  const visibleSeed = weddingChecklistSeed.filter((s) => !deleted.has(s.id));
+  return [...visibleSeed, ...state.custom].map((it) => {
+    const phase = state.phaseOverrides[it.id] ?? it.phase;
+    const label = state.labelOverrides[it.id] ?? it.label;
+    return { ...it, phase, label };
   });
 }
 

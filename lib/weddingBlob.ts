@@ -8,6 +8,10 @@ export type WeddingChecklistState = {
   custom: ChecklistItem[];
   /** Per-item phase override (applies to both seed and custom items). */
   phaseOverrides: Record<string, PhaseKey>;
+  /** Per-item label override (lets users rename a seed item). */
+  labelOverrides: Record<string, string>;
+  /** Seed item IDs that the user has chosen to hide via delete. */
+  deletedSeedIds: string[];
   updatedAt: string;
 };
 
@@ -16,6 +20,8 @@ function emptyState(): WeddingChecklistState {
     checked: {},
     custom: [],
     phaseOverrides: {},
+    labelOverrides: {},
+    deletedSeedIds: [],
     updatedAt: new Date(0).toISOString(),
   };
 }
@@ -57,7 +63,28 @@ function validate(parsed: unknown): WeddingChecklistState | null {
       if (typeof k === "string" && isPhase(v)) phaseOverrides[k] = v;
     }
   }
-  return { checked, custom, phaseOverrides, updatedAt: o.updatedAt };
+  const labelOverrides: Record<string, string> = {};
+  if (o.labelOverrides && typeof o.labelOverrides === "object") {
+    for (const [k, v] of Object.entries(o.labelOverrides as Record<string, unknown>)) {
+      if (typeof k === "string" && typeof v === "string" && v.length > 0 && v.length <= 200) {
+        labelOverrides[k] = v;
+      }
+    }
+  }
+  const deletedSeedIds: string[] = [];
+  if (Array.isArray(o.deletedSeedIds)) {
+    for (const id of o.deletedSeedIds) {
+      if (typeof id === "string" && id.length > 0 && id.length < 200) deletedSeedIds.push(id);
+    }
+  }
+  return {
+    checked,
+    custom,
+    phaseOverrides,
+    labelOverrides,
+    deletedSeedIds,
+    updatedAt: o.updatedAt,
+  };
 }
 
 let cachedUrl: string | null = null;

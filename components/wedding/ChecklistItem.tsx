@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ChecklistItem as Item } from "@/data/weddingChecklistSeed";
 
 type ConfettiPiece = { dx: number; dy: number; color: string; rot: number; size: number };
@@ -35,6 +35,7 @@ export function ChecklistItemRow({
   checked,
   onToggle,
   onRemove,
+  onEdit,
   onDragStart,
   onDragEnd,
   isCustom,
@@ -42,13 +43,50 @@ export function ChecklistItemRow({
   item: Item;
   checked: boolean;
   onToggle: () => void;
-  onRemove?: () => void;
+  onRemove: () => void;
+  onEdit: (label: string) => void;
   onDragStart: (id: string) => void;
   onDragEnd: () => void;
   isCustom: boolean;
 }) {
   const [burstId, setBurstId] = useState(0);
   const [pieces, setPieces] = useState<ConfettiPiece[]>([]);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editValue, setEditValue] = useState(item.label);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const editInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onPointerDown = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("mousedown", onPointerDown);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("mousedown", onPointerDown);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
+
+  useEffect(() => {
+    if (editing) {
+      editInputRef.current?.focus();
+      editInputRef.current?.select();
+    }
+  }, [editing]);
+
+  // Keep editValue in sync if the item's label changes externally
+  // (e.g. another tab made an edit).
+  useEffect(() => {
+    if (!editing) setEditValue(item.label);
+  }, [item.label, editing]);
 
   function handleClick() {
     if (!checked) {
@@ -58,16 +96,40 @@ export function ChecklistItemRow({
     onToggle();
   }
 
+  function startEdit() {
+    setEditValue(item.label);
+    setEditing(true);
+    setMenuOpen(false);
+  }
+
+  function commitEdit() {
+    const trimmed = editValue.trim();
+    if (!trimmed || trimmed === item.label) {
+      setEditing(false);
+      setEditValue(item.label);
+      return;
+    }
+    onEdit(trimmed);
+    setEditing(false);
+  }
+
+  function cancelEdit() {
+    setEditing(false);
+    setEditValue(item.label);
+  }
+
   return (
     <li
-      draggable
+      draggable={!editing}
       onDragStart={(e) => {
         e.dataTransfer.setData("text/plain", item.id);
         e.dataTransfer.effectAllowed = "move";
         onDragStart(item.id);
       }}
       onDragEnd={onDragEnd}
-      className="group/item relative grid cursor-move grid-cols-[auto_auto_1fr_auto] items-start gap-2 py-2"
+      className={`group/item relative grid grid-cols-[auto_auto_1fr_auto] items-start gap-2 py-2 ${
+        editing ? "cursor-default" : "cursor-move"
+      }`}
     >
       <span
         aria-hidden
@@ -127,21 +189,42 @@ export function ChecklistItemRow({
       </button>
 
       <div className="min-w-0">
-        <div className="relative inline-block max-w-full">
-          <span
-            className={`block text-[15px] leading-snug transition-colors duration-300 ${
-              checked ? "text-ink-soft" : "text-ink"
-            }`}
-          >
-            {item.label}
-          </span>
-          <span
-            aria-hidden
-            className={`pointer-events-none absolute left-0 top-1/2 h-[1.5px] w-full bg-ink-soft/70 ${
-              checked ? "wedding-strike-on" : "wedding-strike"
-            }`}
+        {editing ? (
+          <input
+            ref={editInputRef}
+            type="text"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={commitEdit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                commitEdit();
+              } else if (e.key === "Escape") {
+                e.preventDefault();
+                cancelEdit();
+              }
+            }}
+            maxLength={200}
+            className="w-full rounded-md border border-forest/40 bg-cream px-2 py-1 text-[15px] text-ink focus:border-forest focus:outline-none"
           />
-        </div>
+        ) : (
+          <div className="relative inline-block max-w-full">
+            <span
+              className={`block text-[15px] leading-snug transition-colors duration-300 ${
+                checked ? "text-ink-soft" : "text-ink"
+              }`}
+            >
+              {item.label}
+            </span>
+            <span
+              aria-hidden
+              className={`pointer-events-none absolute left-0 top-1/2 h-[1.5px] w-full bg-ink-soft/70 ${
+                checked ? "wedding-strike-on" : "wedding-strike"
+              }`}
+            />
+          </div>
+        )}
         {isCustom ? (
           <div className="mt-1">
             <span className="rounded-sm bg-peach/40 px-1.5 py-[1px] font-mono text-[10px] uppercase tracking-[0.16em] text-ink-soft">
@@ -151,18 +234,44 @@ export function ChecklistItemRow({
         ) : null}
       </div>
 
-      {isCustom && onRemove ? (
+      <div ref={menuRef} className="relative">
         <button
           type="button"
-          onClick={onRemove}
-          aria-label={`Remove ${item.label}`}
-          className="mt-1 cursor-pointer px-1 font-mono text-[14px] leading-none text-ink-soft opacity-0 transition hover:text-rust group-hover/item:opacity-100"
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label={`Actions for ${item.label}`}
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          className="mt-0.5 cursor-pointer rounded-md px-1.5 py-0.5 font-mono text-[16px] leading-none text-ink-soft/60 opacity-60 transition hover:bg-ink/5 hover:text-ink hover:opacity-100 group-hover/item:opacity-100"
         >
-          ×
+          ⋯
         </button>
-      ) : (
-        <span aria-hidden />
-      )}
+        {menuOpen ? (
+          <div
+            role="menu"
+            className="absolute right-0 top-full z-20 mt-1 grid w-32 overflow-hidden rounded-md border border-ink/15 bg-cream py-1 shadow-lg shadow-ink/15"
+          >
+            <button
+              type="button"
+              role="menuitem"
+              onClick={startEdit}
+              className="cursor-pointer px-3 py-1.5 text-left font-mono text-[11px] uppercase tracking-[0.14em] text-ink-soft transition hover:bg-forest/10 hover:text-ink"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setMenuOpen(false);
+                onRemove();
+              }}
+              className="cursor-pointer px-3 py-1.5 text-left font-mono text-[11px] uppercase tracking-[0.14em] text-rust transition hover:bg-rust/10"
+            >
+              Delete
+            </button>
+          </div>
+        ) : null}
+      </div>
     </li>
   );
 }

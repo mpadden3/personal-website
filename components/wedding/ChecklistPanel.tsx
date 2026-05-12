@@ -15,7 +15,8 @@ type ChecklistAction =
   | { type: "toggle"; id: string }
   | { type: "add"; label: string; phase: PhaseKey }
   | { type: "remove"; id: string }
-  | { type: "move"; id: string; toPhase: PhaseKey };
+  | { type: "move"; id: string; toPhase: PhaseKey }
+  | { type: "edit"; id: string; label: string };
 
 function applyOptimistic(
   state: WeddingChecklistState,
@@ -36,16 +37,24 @@ function applyOptimistic(
     };
   }
   if (action.type === "remove") {
-    if (seedIds.has(action.id)) return state;
     const checked = { ...state.checked };
     delete checked[action.id];
     const phaseOverrides = { ...state.phaseOverrides };
     delete phaseOverrides[action.id];
+    const labelOverrides = { ...state.labelOverrides };
+    delete labelOverrides[action.id];
+    if (seedIds.has(action.id)) {
+      const deletedSeedIds = state.deletedSeedIds.includes(action.id)
+        ? state.deletedSeedIds
+        : [...state.deletedSeedIds, action.id];
+      return { ...state, checked, phaseOverrides, labelOverrides, deletedSeedIds };
+    }
     return {
       ...state,
       custom: state.custom.filter((c) => c.id !== action.id),
       checked,
       phaseOverrides,
+      labelOverrides,
     };
   }
   if (action.type === "move") {
@@ -60,6 +69,23 @@ function applyOptimistic(
       c.id === action.id ? { ...c, phase: action.toPhase } : c,
     );
     return { ...state, phaseOverrides, custom };
+  }
+  if (action.type === "edit") {
+    const labelOverrides = { ...state.labelOverrides };
+    let custom = state.custom;
+    if (seedIds.has(action.id)) {
+      const seed = weddingChecklistSeed.find((s) => s.id === action.id);
+      if (seed && seed.label === action.label) {
+        delete labelOverrides[action.id];
+      } else {
+        labelOverrides[action.id] = action.label;
+      }
+    } else {
+      custom = state.custom.map((c) =>
+        c.id === action.id ? { ...c, label: action.label } : c,
+      );
+    }
+    return { ...state, labelOverrides, custom };
   }
   return state;
 }
@@ -84,10 +110,14 @@ export function ChecklistPanel({
 
   const seedIds = useMemo(() => new Set(weddingChecklistSeed.map((s) => s.id)), []);
 
-  const items = useMemo<ChecklistItem[]>(
-    () => [...weddingChecklistSeed, ...state.custom],
-    [state.custom],
-  );
+  const items = useMemo<ChecklistItem[]>(() => {
+    const deleted = new Set(state.deletedSeedIds);
+    const visibleSeed = weddingChecklistSeed.filter((s) => !deleted.has(s.id));
+    return [...visibleSeed, ...state.custom].map((it) => ({
+      ...it,
+      label: state.labelOverrides[it.id] ?? it.label,
+    }));
+  }, [state.custom, state.deletedSeedIds, state.labelOverrides]);
 
   const byPhase = useMemo(() => {
     const map = new Map<PhaseKey, ChecklistItem[]>();
@@ -139,6 +169,9 @@ export function ChecklistPanel({
     const currentPhase = resolvePhase(item, state.phaseOverrides);
     if (currentPhase === toPhase) return;
     requestMutation(() => send({ type: "move", id, toPhase }));
+  }
+  function handleEdit(id: string, label: string) {
+    requestMutation(() => send({ type: "edit", id, label }));
   }
   function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -270,6 +303,7 @@ export function ChecklistPanel({
                       checked={!!state.checked[it.id]}
                       onToggle={() => handleToggle(it.id)}
                       onRemove={() => handleRemove(it.id)}
+                      onEdit={(label) => handleEdit(it.id, label)}
                       onDragStart={(id) => setDraggingId(id)}
                       onDragEnd={() => {
                         setDraggingId(null);
