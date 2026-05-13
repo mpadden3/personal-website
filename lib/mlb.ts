@@ -1,6 +1,6 @@
 const BASE = "https://statsapi.mlb.com/api/v1";
 const MARINERS_TEAM_ID = 136;
-const UA = "marinerspulse.mikepadden.dev (mike@mikepadden.dev)";
+const UA = "michaelpadden.com (mpadden33@gmail.com)";
 
 export type GameSummary = {
   gamePk: number;

@@ -1,7 +1,7 @@
 import { parse } from "csv-parse/sync";
 
 const BASE = "https://baseballsavant.mlb.com/statcast_search/csv";
-const UA = "marinerspulse.mikepadden.dev (mike@mikepadden.dev)";
+const UA = "michaelpadden.com (mpadden33@gmail.com)";
 
 export type SavantPA = {
   playerId: number;
