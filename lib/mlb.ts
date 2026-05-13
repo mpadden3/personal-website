@@ -46,12 +46,31 @@ export type Boxscore = {
   pitching: PitcherLine[];
 };
 
-export type NextSeries = {
+export type SeriesRecord = {
   opponent: string;
   opponentAbbrev: string;
-  firstGameDate: string;
-  venue: string;
   homeAway: "home" | "away";
+  venue: string;
+  startDate: string;
+  endDate: string;
+  marinersWins: number;
+  opponentWins: number;
+  gamesPlayed: number;
+  scheduledGames: number;
+  status: "complete" | "in_progress" | "upcoming";
+  // For in_progress/upcoming series: the date of the next not-yet-final game.
+  nextGameDate?: string;
+};
+
+export type SeriesContext = {
+  // Most recent completed series, newest first. Excludes the current series
+  // if one is in progress.
+  recentSeries: SeriesRecord[];
+  // The series currently underway (at least one game final, at least one not).
+  // Null when the team is between series.
+  currentSeries: SeriesRecord | null;
+  // The next series that has not started yet. Useful when currentSeries is null.
+  nextSeries: SeriesRecord | null;
 };
 
 async function mlbFetch<T>(path: string, search: Record<string, string>): Promise<T> {
@@ -234,9 +253,84 @@ export async function getBoxscore(gamePk: number): Promise<Boxscore> {
   return { gamePk, batting, pitching };
 }
 
-export async function getNextSeries(): Promise<NextSeries | null> {
+type GroupedGame = {
+  date: string;
+  opponent: string;
+  opponentAbbrev: string;
+  homeAway: "home" | "away";
+  venue: string;
+  abstractGameState: "Final" | "Live" | "Preview";
+  marinersScore: number;
+  opponentScore: number;
+};
+
+function dayDiff(a: string, b: string): number {
+  const [ay, am, ad] = a.split("-").map(Number);
+  const [by, bm, bd] = b.split("-").map(Number);
+  const da = Date.UTC(ay, am - 1, ad);
+  const db = Date.UTC(by, bm - 1, bd);
+  return Math.abs(Math.round((db - da) / 86400000));
+}
+
+// Group consecutive games against the same opponent into series. We use a
+// date-proximity rule (gap <= 2 days) rather than MLB's seriesGameNumber so
+// the grouping is deterministic and doesn't depend on undocumented fields.
+function groupIntoSeries(games: GroupedGame[]): SeriesRecord[] {
+  const groups: GroupedGame[][] = [];
+  for (const g of games) {
+    const last = groups[groups.length - 1];
+    if (last && last[0].opponent === g.opponent) {
+      const lastDate = last[last.length - 1].date;
+      if (dayDiff(lastDate, g.date) <= 2) {
+        last.push(g);
+        continue;
+      }
+    }
+    groups.push([g]);
+  }
+  return groups.map((group) => {
+    const first = group[0];
+    const last = group[group.length - 1];
+    let marinersWins = 0;
+    let opponentWins = 0;
+    let gamesPlayed = 0;
+    let nextGameDate: string | undefined;
+    for (const g of group) {
+      if (g.abstractGameState === "Final") {
+        gamesPlayed += 1;
+        if (g.marinersScore > g.opponentScore) marinersWins += 1;
+        else opponentWins += 1;
+      } else if (!nextGameDate) {
+        nextGameDate = g.date;
+      }
+    }
+    const allFinal = group.every((g) => g.abstractGameState === "Final");
+    const anyFinal = group.some((g) => g.abstractGameState === "Final");
+    const status: SeriesRecord["status"] = allFinal
+      ? "complete"
+      : anyFinal
+        ? "in_progress"
+        : "upcoming";
+    return {
+      opponent: first.opponent,
+      opponentAbbrev: first.opponentAbbrev,
+      homeAway: first.homeAway,
+      venue: first.venue,
+      startDate: first.date,
+      endDate: last.date,
+      marinersWins,
+      opponentWins,
+      gamesPlayed,
+      scheduledGames: group.length,
+      status,
+      nextGameDate,
+    };
+  });
+}
+
+export async function getSeriesContext(): Promise<SeriesContext> {
   const today = todayPT();
-  const startDate = shiftDays(today, 1);
+  const startDate = shiftDays(today, -28);
   const endDate = shiftDays(today, 10);
   const data = await mlbFetch<ScheduleResponse>("/schedule", {
     sportId: "1",
@@ -245,20 +339,45 @@ export async function getNextSeries(): Promise<NextSeries | null> {
     endDate,
     hydrate: "team",
   });
+  const games: GroupedGame[] = [];
   for (const day of data.dates ?? []) {
     for (const g of day.games ?? []) {
-      const state = g.status.abstractGameState;
-      if (state !== "Preview" && state !== "Live") continue;
       const marinersIsHome = g.teams.home.team.id === MARINERS_TEAM_ID;
+      const m = marinersIsHome ? g.teams.home : g.teams.away;
       const o = marinersIsHome ? g.teams.away : g.teams.home;
-      return {
+      const abstractGameState = g.status.abstractGameState as
+        | "Final"
+        | "Live"
+        | "Preview";
+      if (
+        abstractGameState !== "Final" &&
+        abstractGameState !== "Live" &&
+        abstractGameState !== "Preview"
+      ) {
+        continue;
+      }
+      games.push({
+        date: g.officialDate ?? g.gameDate.slice(0, 10),
         opponent: o.team.name,
         opponentAbbrev: o.team.abbreviation ?? o.team.name.slice(0, 3).toUpperCase(),
-        firstGameDate: g.officialDate ?? g.gameDate.slice(0, 10),
-        venue: g.venue?.name ?? "",
         homeAway: marinersIsHome ? "home" : "away",
-      };
+        venue: g.venue?.name ?? "",
+        abstractGameState,
+        marinersScore: m.score ?? 0,
+        opponentScore: o.score ?? 0,
+      });
     }
   }
-  return null;
+  games.sort((a, b) => (a.date < b.date ? -1 : 1));
+
+  const series = groupIntoSeries(games);
+  const completed = series.filter((s) => s.status === "complete");
+  const inProgress = series.filter((s) => s.status === "in_progress");
+  const upcoming = series.filter((s) => s.status === "upcoming");
+
+  return {
+    recentSeries: completed.slice(-3).reverse(),
+    currentSeries: inProgress[inProgress.length - 1] ?? null,
+    nextSeries: upcoming[0] ?? null,
+  };
 }

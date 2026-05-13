@@ -1,5 +1,5 @@
 import { chatJSON } from "./openrouter";
-import type { GameSummary, NextSeries } from "./mlb";
+import type { GameSummary, SeriesContext } from "./mlb";
 
 export type SavantSignal = {
   name: string;
@@ -36,14 +36,17 @@ Tone rules by field:
   • Quality-of-opponent overrides record: a 2-3 stretch that includes a win over a contender or division rival can still be framed positively around that win, even if the overall record was below .500. Conversely, a 3-2 stretch where the wins came against bottom-tier opponents shouldn't be oversold.
   • Always factual; never sugar-coat losses or invent moral victories.
 
-- Series-level context: \`recentContextGames\` (if present) contains additional recent games beyond the five-game window, listed in reverse chronological order (most recent first), for context only. Use them like this:
-  • When the same opponent appears in both \`games\` and \`recentContextGames\` on consecutive dates, they're part of one series. Compute the FULL series record (e.g., "won 2 of 3 against Atlanta") instead of just the within-window record (e.g., "split with Atlanta").
-  • You MAY reference complete-series outcomes (win/loss of the series, series record like "2 of 3") in the recap when they add useful context.
-  • Do NOT cite specific scores, individual game results, or stats from \`recentContextGames\` directly — those are not shown to the reader. Only series-level summaries are allowed.
+- Series-level facts: ALL series-level claims (e.g., "swept," "won 2 of 3," "took the series," "split") MUST come from \`seriesContext\`, never from your own inference over \`games\`. The \`games\` list shows only the most recent five final games and may slice through the middle of a series. Trust \`seriesContext\` as the authoritative source.
+  • \`seriesContext.recentSeries\` lists recently completed series, newest first. Each has \`marinersWins\`, \`opponentWins\`, and \`scheduledGames\` — use those numbers verbatim ("won 2 of 3 against the White Sox," "got swept in Baltimore"). Do NOT say "swept" unless \`marinersWins === 0\` (or \`opponentWins === 0\` for a Mariners sweep) AND \`status === "complete"\`.
+  • \`seriesContext.currentSeries\`, if present, is a series IN PROGRESS — some games played, some still to come. NEVER describe it as a finished series. You may reference the partial record (e.g., "off to a 2-0 start in Houston with two games left") only if it genuinely adds context to the recap.
+  • Do NOT cite individual game scores or dates from any series in \`seriesContext\`. Series-level summaries only.
 
 - \`playerOfTheWeekBlurb\`: ALWAYS positive and celebratory. This player was picked because they performed well in the stretch — write about them like you'd write about a hometown standout. 1-2 sentences.
 
-- \`oneThingToWatch\`: Forward-looking. Anticipatory tone; can lightly acknowledge if the team needs a bounce-back, but the focus is the next series, not regret about the last one. 1 sentence.
+- \`oneThingToWatch\`: Forward-looking. Anticipatory tone; can lightly acknowledge if the team needs a bounce-back, but the focus is what comes next, not regret about the last stretch. 1 sentence.
+  • If \`seriesContext.currentSeries\` is present, frame this as the rest of an ongoing series (e.g., "two more in Houston," "Sunday's series finale vs the Yankees"). Do NOT call it a new or upcoming series — it has already started.
+  • If \`currentSeries\` is null and \`nextSeries\` is present, frame it as a new series starting on \`nextSeries.nextGameDate\` (or \`startDate\`).
+  • If both are null, write a generic forward-looking line — no opponent or date.
 
 - \`statcastNote\`: ALWAYS positive at the player level. Rules:
   • If ANY hitter in \`savantSignals.topHitters\` has trend='hot', write \`statcastNote\` about that hot hitter. Name them. If multiple are hot, pick the one with the highest rollingXwoba30PA.
@@ -77,9 +80,8 @@ function validate(parsed: unknown): Narrative | null {
 
 export async function generateNarrative(input: {
   games: GameSummary[];
-  recentContextGames?: GameSummary[];
+  seriesContext: SeriesContext;
   potw: PotwForPrompt | null;
-  nextSeries: NextSeries | null;
   savantSignals?: { topHitters: SavantSignal[] };
 }): Promise<Narrative | null> {
   return chatJSON<Narrative>({

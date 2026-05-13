@@ -134,7 +134,8 @@ export default async function MarinersPulsePage() {
     );
   }
 
-  const { games, potw, nextSeries, narrativePromise, savantPayload } = data;
+  const { games, potw, seriesContext, narrativePromise, savantPayload } = data;
+  const watchSeries = seriesContext.currentSeries ?? seriesContext.nextSeries;
   const showChart = !!(savantPayload && !savantPayload.stale && savantPayload.hitters.length > 0);
 
   return (
@@ -160,7 +161,7 @@ export default async function MarinersPulsePage() {
           }
         />
         <WatchNextCard
-          nextSeries={nextSeries}
+          series={watchSeries}
           watchSlot={
             <Suspense fallback={null}>
               <WatchSlot narrativePromise={narrativePromise} />

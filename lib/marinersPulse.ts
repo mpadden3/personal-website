@@ -2,9 +2,9 @@ import { cache } from "react";
 import {
   getLastNFinalGames,
   getBoxscore,
-  getNextSeries,
+  getSeriesContext,
   type GameSummary,
-  type NextSeries,
+  type SeriesContext,
   type BatterLine,
   type PitcherLine,
 } from "./mlb";
@@ -51,7 +51,7 @@ export type PulseState =
       state: "live";
       games: GameSummary[];
       potw: PotwAggregate | null;
-      nextSeries: NextSeries | null;
+      seriesContext: SeriesContext;
       narrativePromise: Promise<Narrative | null>;
       savantPayload: SavantPayload | null;
     }
@@ -228,22 +228,26 @@ function todayPT(): string {
 
 export const getMarinersPulse = cache(async (): Promise<PulseState> => {
   // Kick off three independent fetches in parallel.
-  const gamesPromise = getLastNFinalGames(10);
+  const gamesPromise = getLastNFinalGames(5);
   const savantPromise = getSavantChartData();
-  const nextSeriesPromise = getNextSeries().catch((err) => {
-    console.warn("[pulse] next-series fetch failed:", (err as Error).message);
-    return null;
+  const seriesContextPromise = getSeriesContext().catch((err) => {
+    console.warn("[pulse] series-context fetch failed:", (err as Error).message);
+    return {
+      recentSeries: [],
+      currentSeries: null,
+      nextSeries: null,
+    } as SeriesContext;
   });
 
-  let recentGames: GameSummary[];
+  let games: GameSummary[];
   try {
-    recentGames = await gamesPromise;
+    games = await gamesPromise;
   } catch (err) {
     console.warn("[pulse] schedule fetch failed:", (err as Error).message);
     return { state: "error" };
   }
 
-  if (recentGames.length < 1) {
+  if (games.length < 1) {
     const savantPayload = await savantPromise;
     return {
       state: "off-season",
@@ -251,9 +255,6 @@ export const getMarinersPulse = cache(async (): Promise<PulseState> => {
       savantPayload,
     };
   }
-
-  const games = recentGames.slice(0, 5);
-  const recentContextGames = recentGames.slice(5);
 
   const boxResults = await Promise.allSettled(games.map((g) => getBoxscore(g.gamePk)));
   const allBatting: BatterLine[] = [];
@@ -266,14 +267,16 @@ export const getMarinersPulse = cache(async (): Promise<PulseState> => {
   }
 
   const potw = pickPotw(allBatting, allPitching);
-  const [savantPayload, nextSeries] = await Promise.all([savantPromise, nextSeriesPromise]);
+  const [savantPayload, seriesContext] = await Promise.all([
+    savantPromise,
+    seriesContextPromise,
+  ]);
   const savantSignals = buildSavantSignals(savantPayload);
 
   const narrativeInput = {
     games,
-    recentContextGames,
+    seriesContext,
     potw: potwForPrompt(potw),
-    nextSeries,
     savantSignals,
   };
   const fingerprint = narrativeFingerprint(narrativeInput);
@@ -305,7 +308,7 @@ export const getMarinersPulse = cache(async (): Promise<PulseState> => {
     state: "live",
     games,
     potw,
-    nextSeries,
+    seriesContext,
     narrativePromise,
     savantPayload,
   };

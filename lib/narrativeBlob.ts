@@ -1,6 +1,6 @@
 import { list, put } from "@vercel/blob";
 import type { Narrative, SavantSignal, PotwForPrompt } from "./pulseNarrative";
-import type { GameSummary, NextSeries } from "./mlb";
+import type { GameSummary, SeriesContext, SeriesRecord } from "./mlb";
 
 const BLOB_PATH = "mariners-pulse/narrative.json";
 
@@ -12,23 +12,26 @@ export type CachedNarrative = {
 
 type NarrativeInput = {
   games: GameSummary[];
-  recentContextGames?: GameSummary[];
+  seriesContext: SeriesContext;
   potw: PotwForPrompt | null;
-  nextSeries: NextSeries | null;
   savantSignals?: { topHitters: SavantSignal[] };
 };
+
+function seriesKey(s: SeriesRecord): string {
+  return `${s.opponentAbbrev}:${s.startDate}:${s.status}:${s.marinersWins}-${s.opponentWins}/${s.scheduledGames}`;
+}
 
 // Stable string derived from the inputs that meaningfully affect the LLM
 // output. If any of these change, the cached narrative is invalidated and a
 // fresh one is generated. Same inputs → same fingerprint → reuse cache.
 export function narrativeFingerprint(input: NarrativeInput): string {
+  const ctx = input.seriesContext;
   const stable = {
     games: input.games.map((g) => g.gamePk).sort(),
-    contextGames: (input.recentContextGames ?? []).map((g) => g.gamePk).sort(),
+    recentSeries: ctx.recentSeries.map(seriesKey),
+    currentSeries: ctx.currentSeries ? seriesKey(ctx.currentSeries) : null,
+    nextSeries: ctx.nextSeries ? seriesKey(ctx.nextSeries) : null,
     potw: input.potw?.name ?? null,
-    nextSeries: input.nextSeries
-      ? `${input.nextSeries.opponentAbbrev}:${input.nextSeries.firstGameDate}`
-      : null,
     savantTrends:
       input.savantSignals?.topHitters
         .map((h) => `${h.name}:${h.trend}`)
