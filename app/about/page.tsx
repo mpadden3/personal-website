@@ -51,7 +51,7 @@ export default function AboutPage() {
           </div>
           <h1 className="h-display mt-7 max-w-4xl text-[clamp(2.6rem,6.5vw,5rem)] text-ink">
             A small workshop,{" "}
-            <span className="display-italic text-cobalt">
+            <span className="display-italic text-forest">
               built one tool at a time
             </span>
             .
@@ -132,7 +132,7 @@ export default function AboutPage() {
               <span className="label-eyebrow">Best way to reach me</span>
               <a
                 href="mailto:mpadden33@gmail.com"
-                className="font-mono text-[13.5px] text-cobalt hover:text-cobalt-deep"
+                className="font-mono text-[13.5px] text-forest hover:text-forest-deep"
               >
                 <span className="ink-underline">mpadden33@gmail.com</span>
               </a>

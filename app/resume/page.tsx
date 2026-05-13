@@ -46,7 +46,7 @@ export default function ResumePage() {
             </div>
             <h1 className="h-display mt-7 text-[clamp(2.5rem,6vw,4.5rem)] text-ink">
               Mike Padden,{" "}
-              <span className="display-italic text-cobalt">on the record.</span>
+              <span className="display-italic text-forest">on the record.</span>
             </h1>
             <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-ink/85">
               My professional background is focused on AI delivery, business
@@ -56,15 +56,15 @@ export default function ResumePage() {
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <a
-                href="/resume.pdf"
+                href="/MichaelPadden_Resume.pdf"
                 download
-                className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-[13.5px] font-medium text-cream transition-colors hover:bg-cobalt-deep"
+                className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-[13.5px] font-medium text-cream transition-colors hover:bg-forest-deep"
               >
                 <span aria-hidden>↓</span>
                 Download Resume PDF
               </a>
               <a
-                href="https://www.linkedin.com/"
+                href="https://www.linkedin.com/in/michael-padden-470a0ab0/"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 rounded-full bg-cream px-5 py-3 text-[13.5px] font-medium text-ink ring-1 ring-ink/30 transition-colors hover:ring-ink"
@@ -81,14 +81,20 @@ export default function ResumePage() {
             </div>
           </div>
 
-          {/* PDF preview placeholder */}
+          {/* PDF preview — click to open the real file */}
           <div className="relative">
-            <div className="relative mx-auto w-full max-w-sm rotate-[-1.5deg] rounded-md border border-ink/20 bg-cream-deep/80 p-6 shadow-[0_18px_48px_-24px_oklch(0.205_0.045_250/0.45)]">
+            <a
+              href="/MichaelPadden_Resume.pdf"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Open Mike Padden's resume PDF"
+              className="group relative mx-auto block w-full max-w-sm rotate-[-1.5deg] rounded-md border border-ink/20 bg-cream-deep/80 p-6 shadow-[0_18px_48px_-24px_oklch(0.205_0.045_250/0.45)] transition-transform hover:-rotate-[0.5deg] hover:shadow-[0_22px_56px_-22px_oklch(0.205_0.045_250/0.55)]"
+            >
               <div className="absolute -top-2 left-6 h-1 w-12 rounded-sm bg-rust/80" aria-hidden />
               <div className="flex items-center justify-between border-b border-ink/15 pb-3">
                 <span className="label-eyebrow">PDF · 1 page</span>
                 <span className="font-mono text-[11px] text-ink-soft tabular">
-                  resume.pdf
+                  MichaelPadden_Resume.pdf
                 </span>
               </div>
               <div className="mt-4 space-y-2.5">
@@ -110,10 +116,13 @@ export default function ResumePage() {
                   <div className="h-1.5 w-10/12 rounded-sm bg-ink/10" />
                 </div>
               </div>
-              <p className="mt-6 border-t border-ink/10 pt-3 text-[10.5px] text-ink-soft font-mono tracking-wide">
-                Placeholder. Real PDF will be dropped in shortly.
-              </p>
-            </div>
+              <div className="mt-6 flex items-center justify-between border-t border-ink/10 pt-3 font-mono text-[10.5px] tracking-wide text-ink-soft">
+                <span>Open in a new tab</span>
+                <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
+                  ↗
+                </span>
+              </div>
+            </a>
           </div>
         </div>
       </section>
@@ -130,7 +139,7 @@ export default function ResumePage() {
           </div>
           <h2 className="h-display text-[clamp(1.8rem,3.6vw,2.6rem)]">
             Where I&apos;ve been{" "}
-            <span className="display-italic text-cobalt">most useful</span>.
+            <span className="display-italic text-forest">most useful</span>.
           </h2>
         </header>
 

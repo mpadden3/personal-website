@@ -8,7 +8,7 @@ const pageLinks = [
 ];
 
 const elsewhereLinks = [
-  { href: "https://www.linkedin.com/", label: "LinkedIn" },
+  { href: "https://www.linkedin.com/in/michael-padden-470a0ab0/", label: "LinkedIn" },
   { href: "mailto:mpadden33@gmail.com", label: "Email" },
 ];
 

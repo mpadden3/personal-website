@@ -28,7 +28,7 @@ export default function LabPage() {
             </div>
             <h1 className="h-display mt-7 text-[clamp(2.5rem,6vw,4.5rem)] text-ink">
               The{" "}
-              <span className="display-italic text-cobalt">AI Lab.</span>
+              <span className="display-italic text-forest">AI Lab.</span>
             </h1>
             <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-ink/85">
               A collection of practical, personal, and sometimes ridiculous AI
@@ -100,7 +100,7 @@ export default function LabPage() {
           </p>
           <a
             href="#"
-            className="inline-flex items-center gap-2 self-start rounded-full bg-ink px-4 py-2.5 text-[13px] font-medium text-cream hover:bg-cobalt-deep sm:self-auto"
+            className="inline-flex items-center gap-2 self-start rounded-full bg-ink px-4 py-2.5 text-[13px] font-medium text-cream hover:bg-forest-deep sm:self-auto"
           >
             Open the assistant
             <span aria-hidden>↗</span>

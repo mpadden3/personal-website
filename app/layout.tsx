@@ -32,7 +32,22 @@ export const metadata: Metadata = {
   },
   description:
     "Personal AI lab from Mike Padden in Seattle — small tools for research, sports, weddings, and AI use case discovery.",
-  metadataBase: new URL("http://localhost:3000"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  ),
+  openGraph: {
+    type: "website",
+    siteName: "Mike Padden",
+    title: "Mike Padden — Practical AI tools, built for real life",
+    description:
+      "Personal AI lab from Mike Padden in Seattle — small tools for research, sports, weddings, and AI use case discovery.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mike Padden — Practical AI tools, built for real life",
+    description:
+      "Personal AI lab from Mike Padden in Seattle — small tools for research, sports, weddings, and AI use case discovery.",
+  },
 };
 
 export default function RootLayout({
