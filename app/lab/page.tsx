@@ -29,8 +29,9 @@ export default function LabPage() {
               <span className="display-italic text-forest">AI Lab.</span>
             </h1>
             <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-ink/85">
-              Some fun, vibe-coded AI tools I&apos;m building to explore how I
-              can build AI solutions.
+              Fun, hands-on AI projects I&rsquo;m building to test what&rsquo;s
+              possible with AI &mdash; while creating tools that actually help
+              me in everyday life.
             </p>
           </div>
 
