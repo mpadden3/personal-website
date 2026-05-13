@@ -24,16 +24,14 @@ Open [http://localhost:3000](http://localhost:3000).
 - `/lab` — AI Lab index of all tools
 - `/resume` — Resume / dossier
 - `/about` — About
-- `/tools/mariners-pulse` — Coming soon
-- `/tools/wedding-countdown` — Coming soon
-- `/tools/ai-use-case-scorer` — Coming soon
+- `/tools/mariners-pulse` — Live: last-5-games tracker, AI recap, rolling xwOBA
+- `/tools/wedding-countdown` — Live: countdown, checklist (Vercel Blob), planner chat
+- `/tools/ai-use-case-scorer` — Live: 4-axis scoring, EXA search, generated wireframes
 
-## Phases
+Ashley's AI Assistant lives as its own deployed app — linked from `/` and `/lab`.
 
-This repo is **Phase 1** (site shell). Phases 2–4 add the live AI tools:
+## Env
 
-- Phase 2 — Mariners Pulse (MLB data + AI recap)
-- Phase 3 — Wedding Countdown
-- Phase 4 — AI Use Case Scorer
-
-See `SPEC.md` (Website_spec.md elsewhere) for the full plan.
+See `.env.local.example` for the full list. Required for the AI tools:
+`OPENROUTER_API_KEY`, `OPENAI_API_KEY`, `EXA_API_KEY`, `BLOB_READ_WRITE_TOKEN`,
+`CRON_SECRET`, `SAVANT_BLOB_URL`, `NEXT_PUBLIC_SITE_URL`.

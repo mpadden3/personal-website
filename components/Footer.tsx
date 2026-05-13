@@ -26,8 +26,7 @@ export function Footer() {
             Seattle. Set in Fraunces &amp; IBM Plex.
           </p>
           <p className="marginalia mt-6 text-ink-soft">
-            Currently building Mariners Pulse and a wedding countdown. Saying
-            no to chatbot bloat.
+            Saying no to chatbot bloat. Building the next thing on the bench.
           </p>
         </div>
 

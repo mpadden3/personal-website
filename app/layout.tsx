@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import "./globals.css";
@@ -41,12 +42,21 @@ export const metadata: Metadata = {
     title: "Mike Padden — Practical AI tools, built for real life",
     description:
       "Personal AI lab from Mike Padden in Seattle — small tools for research, sports, weddings, and AI use case discovery.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Mike Padden — Practical AI tools, built for real life",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Mike Padden — Practical AI tools, built for real life",
     description:
       "Personal AI lab from Mike Padden in Seattle — small tools for research, sports, weddings, and AI use case discovery.",
+    images: ["/og-image.png"],
   },
 };
 
@@ -66,6 +76,7 @@ export default function RootLayout({
           <main className="flex-1">{children}</main>
           <Footer />
         </div>
+        <Analytics />
       </body>
     </html>
   );

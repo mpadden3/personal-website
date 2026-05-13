@@ -13,6 +13,8 @@ const liveCount = tools.filter((t) => t.status === "live").length;
 const inProgressCount = tools.filter((t) => t.status === "in-progress").length;
 const plannedCount = tools.filter((t) => t.status === "planned").length;
 
+const ashleysAssistant = tools.find((t) => t.slug === "ashleys-ai-assistant");
+
 export default function LabPage() {
   return (
     <div>
@@ -94,7 +96,9 @@ export default function LabPage() {
             the lab with it.
           </p>
           <a
-            href="#"
+            href={ashleysAssistant?.href ?? "/lab"}
+            target="_blank"
+            rel="noreferrer"
             className="inline-flex items-center gap-2 self-start rounded-full bg-ink px-4 py-2.5 text-[13px] font-medium text-cream hover:bg-forest-deep sm:self-auto"
           >
             Open the assistant
