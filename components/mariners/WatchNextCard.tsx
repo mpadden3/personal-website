@@ -14,10 +14,10 @@ function formatDate(iso: string): string {
 
 export function WatchNextCard({
   nextSeries,
-  watch,
+  watchSlot,
 }: {
   nextSeries: NextSeries | null;
-  watch: string | null | undefined;
+  watchSlot?: React.ReactNode;
 }) {
   if (!nextSeries) return null;
   return (
@@ -35,11 +35,7 @@ export function WatchNextCard({
       <p className="mt-1 font-mono text-[11px] tracking-[0.16em] uppercase tabular text-ink-soft">
         {formatDate(nextSeries.firstGameDate)} · {nextSeries.venue}
       </p>
-      {watch ? (
-        <p className="mt-6 border-t border-ink/10 pt-5 text-[15.5px] leading-relaxed text-ink/85">
-          {watch}
-        </p>
-      ) : null}
+      {watchSlot}
     </article>
   );
 }

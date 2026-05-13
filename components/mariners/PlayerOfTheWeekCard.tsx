@@ -14,10 +14,10 @@ function StatCell({ label, value }: { label: string; value: string | number }) {
 
 export function PlayerOfTheWeekCard({
   potw,
-  blurb,
+  blurbSlot,
 }: {
   potw: PotwAggregate | null;
-  blurb: string | null | undefined;
+  blurbSlot?: React.ReactNode;
 }) {
   if (!potw) {
     return (
@@ -68,11 +68,7 @@ export function PlayerOfTheWeekCard({
         )}
       </dl>
 
-      {blurb ? (
-        <p className="mt-6 border-t border-ink/10 pt-5 text-[15.5px] leading-relaxed text-ink/85">
-          {blurb}
-        </p>
-      ) : null}
+      {blurbSlot}
     </article>
   );
 }

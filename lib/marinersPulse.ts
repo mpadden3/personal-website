@@ -15,6 +15,11 @@ import {
   type SavantSignal,
 } from "./pulseNarrative";
 import { getSavantChartData, type SavantPayload } from "./savantBlob";
+import {
+  narrativeFingerprint,
+  readCachedNarrative,
+  writeCachedNarrative,
+} from "./narrativeBlob";
 
 const SEASON_OPENERS: Record<number, string> = {
   2026: "2026-03-26",
@@ -47,7 +52,7 @@ export type PulseState =
       games: GameSummary[];
       potw: PotwAggregate | null;
       nextSeries: NextSeries | null;
-      narrative: Narrative | null;
+      narrativePromise: Promise<Narrative | null>;
       savantPayload: SavantPayload | null;
     }
   | {
@@ -222,17 +227,24 @@ function todayPT(): string {
 }
 
 export const getMarinersPulse = cache(async (): Promise<PulseState> => {
-  let recentGames: GameSummary[] = [];
+  // Kick off three independent fetches in parallel.
+  const gamesPromise = getLastNFinalGames(10);
+  const savantPromise = getSavantChartData();
+  const nextSeriesPromise = getNextSeries().catch((err) => {
+    console.warn("[pulse] next-series fetch failed:", (err as Error).message);
+    return null;
+  });
+
+  let recentGames: GameSummary[];
   try {
-    recentGames = await getLastNFinalGames(10);
+    recentGames = await gamesPromise;
   } catch (err) {
     console.warn("[pulse] schedule fetch failed:", (err as Error).message);
     return { state: "error" };
   }
 
-  const savantPayload = await getSavantChartData();
-
   if (recentGames.length < 1) {
+    const savantPayload = await savantPromise;
     return {
       state: "off-season",
       seasonStartsOn: offSeasonOpener(todayPT()),
@@ -254,29 +266,47 @@ export const getMarinersPulse = cache(async (): Promise<PulseState> => {
   }
 
   const potw = pickPotw(allBatting, allPitching);
-
-  let nextSeries: NextSeries | null = null;
-  try {
-    nextSeries = await getNextSeries();
-  } catch (err) {
-    console.warn("[pulse] next-series fetch failed:", (err as Error).message);
-  }
-
+  const [savantPayload, nextSeries] = await Promise.all([savantPromise, nextSeriesPromise]);
   const savantSignals = buildSavantSignals(savantPayload);
-  const narrative = await generateNarrative({
+
+  const narrativeInput = {
     games,
     recentContextGames,
     potw: potwForPrompt(potw),
     nextSeries,
     savantSignals,
-  });
+  };
+  const fingerprint = narrativeFingerprint(narrativeInput);
+
+  // Try the cached narrative first. If the cached fingerprint matches the
+  // current inputs, the Suspense boundary resolves instantly and the user
+  // never sees the loading state. Otherwise fall back to a live generation
+  // (streamed via Suspense) and persist the result for the next visitor.
+  const cached = await readCachedNarrative();
+  let narrativePromise: Promise<Narrative | null>;
+  if (cached && cached.fingerprint === fingerprint) {
+    narrativePromise = Promise.resolve(cached.narrative);
+  } else {
+    narrativePromise = generateNarrative(narrativeInput).then((n) => {
+      if (n) {
+        // Best-effort write-back so the next visitor hits cache. Don't block
+        // the response on it; writeCachedNarrative swallows its own errors.
+        void writeCachedNarrative({
+          updatedAt: new Date().toISOString(),
+          fingerprint,
+          narrative: n,
+        });
+      }
+      return n;
+    });
+  }
 
   return {
     state: "live",
     games,
     potw,
     nextSeries,
-    narrative,
+    narrativePromise,
     savantPayload,
   };
 });
