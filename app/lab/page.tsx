@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { tools } from "@/data/tools";
 import { ToolCard } from "@/components/ToolCard";
+import { HeaderBackdrop } from "@/components/HeaderBackdrop";
 
 export const metadata: Metadata = {
   title: "AI Lab",
@@ -16,24 +17,18 @@ export default function LabPage() {
   return (
     <div>
       {/* HEADER */}
-      <section className="border-b border-ink/10">
-        <div className="mx-auto grid max-w-6xl gap-12 px-6 py-16 lg:grid-cols-[1.5fr_1fr] lg:px-10 lg:py-24">
+      <section className="relative border-b border-ink/10">
+        <HeaderBackdrop />
+        <div className="relative mx-auto grid max-w-6xl gap-12 px-6 py-16 lg:grid-cols-[1.5fr_1fr] lg:px-10 lg:py-24">
           <div>
-            <div className="flex items-center gap-3 text-ink-soft">
-              <span className="font-mono text-[11px] tracking-[0.2em] tabular">
-                № 02
-              </span>
-              <span className="h-px w-8 bg-ink/30" aria-hidden />
-              <span className="label-eyebrow">The Workshop</span>
-            </div>
-            <h1 className="h-display mt-7 text-[clamp(2.5rem,6vw,4.5rem)] text-ink">
+            <span className="label-eyebrow text-ink-soft">The Workshop</span>
+            <h1 className="h-display mt-4 text-[clamp(2.5rem,6vw,4.5rem)] text-ink">
               The{" "}
               <span className="display-italic text-forest">AI Lab.</span>
             </h1>
-            <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-ink/85">
-              A collection of practical, personal, and sometimes ridiculous AI
-              tools I&apos;m building to explore how AI can make everyday
-              workflows more useful.
+            <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-ink/85">
+              Some fun, vibe-coded AI tools I&apos;m building to explore how I
+              can build AI solutions.
             </p>
           </div>
 

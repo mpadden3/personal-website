@@ -12,6 +12,7 @@ import type { ComponentType, SVGProps } from "react";
 import { tools } from "@/data/tools";
 import { facets, type FacetId } from "@/data/facets";
 import { StatusBadge } from "@/components/StatusBadge";
+import { HeaderBackdrop } from "@/components/HeaderBackdrop";
 
 const facetIcons: Record<FacetId, ComponentType<SVGProps<SVGSVGElement>>> = {
   operator: Brain,
@@ -37,27 +38,11 @@ export default function HomePage() {
           <div className="absolute top-24 -left-44 h-[360px] w-[360px] rounded-full bg-sky/55 blur-[2px]" />
         </div>
 
-        {/* PNW watercolor backdrop — extends past the hero and fades both at the
-            top (into cream paper) and at the bottom (behind the facet cards). */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-[520px] translate-y-40 overflow-hidden"
-          style={{
-            WebkitMaskImage:
-              "linear-gradient(to bottom, transparent 0%, black 18%, black 55%, transparent 100%)",
-            maskImage:
-              "linear-gradient(to bottom, transparent 0%, black 18%, black 55%, transparent 100%)",
-          }}
-        >
-          <Image
-            src="/hero-backdrop2.png"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-bottom"
-          />
-        </div>
+        {/* PNW watercolor backdrop — same module as every other page, so the
+            Space Needle/Rainier/skyline read at identical size and depth
+            wherever the visitor lands. Priority load since this is above the
+            fold on the home page. */}
+        <HeaderBackdrop priority />
 
         <div className="relative mx-auto grid max-w-6xl gap-8 px-6 pt-6 pb-8 lg:grid-cols-[1.55fr_1fr] lg:gap-12 lg:px-10 lg:pt-8 lg:pb-10">
           {/* Left column — headline */}
@@ -141,22 +126,27 @@ export default function HomePage() {
               {/* Project rows — top 3 only */}
               <ol className="mt-4 grid divide-y divide-forest/15">
                 {featuredTools.map((t) => (
-                  <li
-                    key={t.slug}
-                    className="grid grid-cols-[24px_1fr_auto] items-center gap-3 py-2.5 first:pt-1.5"
-                  >
-                    <span className="font-medium text-[12.5px] tabular text-forest tracking-wide">
-                      {t.index}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="h-display text-[16.5px] leading-snug text-ink">
-                        {t.name}
-                      </p>
-                      <p className="mt-0.5 text-[12.5px] leading-snug text-ink-soft">
-                        {t.tagline}
-                      </p>
-                    </div>
-                    <StatusBadge status={t.status} />
+                  <li key={t.slug} className="first:pt-1.5">
+                    <Link
+                      href={t.href}
+                      {...(t.external
+                        ? { target: "_blank", rel: "noopener noreferrer" }
+                        : {})}
+                      className="-mx-2 grid grid-cols-[24px_1fr_auto] items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-forest/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest/40"
+                    >
+                      <span className="font-medium text-[12.5px] tabular text-forest tracking-wide">
+                        {t.index}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="h-display text-[16.5px] leading-snug text-ink">
+                          {t.name}
+                        </p>
+                        <p className="mt-0.5 text-[12.5px] leading-snug text-ink-soft">
+                          {t.tagline}
+                        </p>
+                      </div>
+                      <StatusBadge status={t.status} />
+                    </Link>
                   </li>
                 ))}
               </ol>

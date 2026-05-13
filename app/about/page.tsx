@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HeaderBackdrop } from "@/components/HeaderBackdrop";
 
 export const metadata: Metadata = {
   title: "About",
@@ -9,10 +10,9 @@ export const metadata: Metadata = {
 
 const details = [
   { label: "Lives", value: "Seattle, Washington" },
-  { label: "Watches", value: "Seattle Mariners (loyally)" },
   {
-    label: "Marrying",
-    value: "Ashley · June 19, 2027",
+    label: "Watches",
+    value: "Seattle Mariners, Seahawks, UW Huskies",
   },
   {
     label: "Curious about",
@@ -40,19 +40,16 @@ export default function AboutPage() {
   return (
     <div>
       {/* HEADER */}
-      <section className="border-b border-ink/10">
-        <div className="mx-auto max-w-6xl px-6 py-16 lg:px-10 lg:py-24">
+      <section className="relative border-b border-ink/10">
+        <HeaderBackdrop />
+        <div className="relative mx-auto max-w-6xl px-6 py-16 lg:px-10 lg:py-24">
           <div className="flex items-center gap-3 text-ink-soft">
-            <span className="font-mono text-[11px] tracking-[0.2em] tabular">
-              № 04
-            </span>
-            <span className="h-px w-8 bg-ink/30" aria-hidden />
             <span className="label-eyebrow">About</span>
           </div>
           <h1 className="h-display mt-7 max-w-4xl text-[clamp(2.6rem,6.5vw,5rem)] text-ink">
-            A small workshop,{" "}
+            Eight years as a consultant,{" "}
             <span className="display-italic text-forest">
-              built one tool at a time
+              all things data and AI
             </span>
             .
           </h1>
@@ -66,8 +63,8 @@ export default function AboutPage() {
           <p className="text-[18px] leading-relaxed text-ink/90">
             I&apos;m a Seattle-based AI delivery lead who likes building
             practical AI tools for the workflows around me — whether
-            that&apos;s helping Ashley research companies, tracking the
-            Mariners, planning a wedding, or helping teams turn messy business
+            that&apos;s researching companies, tracking the Mariners,
+            planning a wedding, or helping teams turn messy business
             processes into usable AI products.
           </p>
           <p className="text-[18px] leading-relaxed text-ink/90">

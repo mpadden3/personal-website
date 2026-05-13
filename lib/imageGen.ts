@@ -3,30 +3,94 @@ import { checkContent } from "./moderation";
 
 const ENDPOINT = "https://api.openai.com/v1/images/generations";
 
-export function buildWireframePrompt(appOneLiner: string): string {
-  return [
-    "Create a high-fidelity, polished product UI mockup of a hypothetical SaaS application.",
-    "Treat this like the hero screenshot for a Product Hunt launch — confident, modern, presentation-grade.",
+// Visual-style directions picked at random per generation so two scored
+// ideas don't look like they came off the same assembly line. Each one
+// nudges color, typography, and overall aesthetic to a distinct place.
+type VisualStyle = { name: string; description: string };
+
+export const VISUAL_STYLES: VisualStyle[] = [
+  {
+    name: "editorial",
+    description:
+      "Editorial publication aesthetic — confident serif display headlines, generous whitespace, magazine-style grid with crisp horizontal rules. Warm paper tones (cream, ink, deep forest, terracotta accents). Mix of high-quality serif and humanist sans-serif. Reminiscent of a refined Substack or The Browser.",
+  },
+  {
+    name: "dense-terminal",
+    description:
+      "Dense data-terminal aesthetic. Compact rows, monospace numerals, color-coded values (green up, red down). Either a dark slate background with phosphor-green accents OR an off-white background with deep ink and cyan accents. Bloomberg-meets-Linear. Information-dense, technical, no marketing softness.",
+  },
+  {
+    name: "soft-glass",
+    description:
+      "Soft glassmorphic aesthetic — translucent panels with subtle backdrop blur, layered depth, gentle gradients. Cool palette: lavender, mint, peach, sky. Rounded corners. Humanist geometric sans-serif. Apple-Vision-Pro-meets-Notion.",
+  },
+  {
+    name: "brutalist-mono",
+    description:
+      "Brutalist monochrome aesthetic. Black, off-white, and exactly ONE bold accent (electric blue OR hot pink OR sulfur yellow OR cadmium orange). 0-radius corners, oversized display typography (use a heavy grotesque or anti-design serif), no shadows. Reminiscent of Vercel's docs, Linear's marketing, or a Berlin design studio.",
+  },
+  {
+    name: "playful-pastel",
+    description:
+      "Playful pastel aesthetic. Generous rounded corners, soft pastel palette (lavender, butter, sky, blush, sage), friendly humanist sans-serif, illustrated icon hints. Approachable like Things 3, Cron, or a thoughtful consumer app. Cheerful but never childish.",
+  },
+  {
+    name: "neon-dark",
+    description:
+      "Neon dark-mode aesthetic. Deep charcoal background (#0a0a0c-ish), vibrant electric cyan and magenta accents, subtle glow on focused elements, modern geometric sans-serif. Crisp and futuristic. Reminiscent of Vercel dashboards or Cursor.",
+  },
+  {
+    name: "warm-print",
+    description:
+      "Warm print-inspired aesthetic. Cream/paper background, terracotta and deep-forest accents, mix of editorial serif (headings) and clean sans (body), hand-drawn icon hints, ink-on-paper feel. Reminiscent of a quality New Yorker app or a thoughtful indie publication.",
+  },
+  {
+    name: "muted-archive",
+    description:
+      "Muted archive aesthetic. Off-white parchment background, sepia and deep navy accents, generous use of small caps and ligatures, monospace metadata. Reads like a well-designed research tool — Are.na, JSTOR-modern, or an early Stripe Press product. Calm, scholarly, confident.",
+  },
+];
+
+function pickStyle(styleIndex?: number): VisualStyle {
+  if (typeof styleIndex === "number" && styleIndex >= 0 && styleIndex < VISUAL_STYLES.length) {
+    return VISUAL_STYLES[styleIndex];
+  }
+  return VISUAL_STYLES[Math.floor(Math.random() * VISUAL_STYLES.length)];
+}
+
+export function buildWireframePrompt(
+  appOneLiner: string,
+  styleIndex?: number,
+): { prompt: string; styleName: string } {
+  const style = pickStyle(styleIndex);
+  const prompt = [
+    "Create a high-fidelity, polished product UI mockup of a hypothetical application.",
+    "Treat this like the hero screenshot for a launch — confident, opinionated, presentation-grade.",
     `The application does the following: ${appOneLiner}.`,
     "",
-    "Design direction:",
-    "- Make creative, concrete assumptions about layout, features, and product surface — invent a real-feeling v1 rather than a generic sketch.",
-    "- Modern SaaS aesthetic: thoughtful typography, generous whitespace, refined color, gentle depth (subtle shadows, soft gradients, glassy panels where it makes sense).",
-    "- Include plausible sample content: realistic-looking numbers, chart titles, headings, and short labels — never lorem ipsum and never placeholder text like 'Title' or 'Button'.",
-    "- If data visualizations make sense, render them as clean modern charts (line, bar, area, sparkline, kanban, table, etc.) with believable values.",
-    "- Pick a tasteful color palette that fits the application's domain. Use color with intent — not flat gray boxes.",
+    `Visual style — commit to this aesthetic, don't water it down: ${style.description}`,
+    "",
+    "Layout direction:",
+    "- Pick the layout that best fits the domain. Could be a sidebar dashboard, a content reader, a chat interface, a table view, a Kanban board, a feed, a single-task focus, a split inspector, or something else — whatever serves the use case.",
     "- Show the primary working screen of the app, not a marketing landing page.",
-    "- Aim for the visual quality of Linear, Vercel, Notion, Stripe, Granola, or Arc — the screenshot should make someone curious to try the product.",
+    "- Invent a plausible fictional product name and a small wordmark or monogram in the corner.",
+    "",
+    "Design rules:",
+    "- Make creative, concrete assumptions about features and product surface — invent a real-feeling v1.",
+    "- Include plausible sample content: realistic numbers, chart titles, headings, short labels. Never lorem ipsum. Never the literal words 'Title' or 'Button'.",
+    "- Render any data viz as clean charts (line, bar, area, sparkline, table, kanban, etc.) with believable values, in a style consistent with the chosen aesthetic.",
+    "- Use color, typography, spacing, and depth deliberately — match the visual style above.",
     "",
     "Mandatory constraints (do not violate):",
     "- No real human figures, no faces, no hands, no body parts. Avatar circles with abstract letter initials are fine.",
-    "- No real brand names, no real logos, no real trademarks. Invent a plausible fictional product name if a logo is needed.",
+    "- No real brand names, no real logos, no real trademarks. The fictional product name should not match any existing company.",
     "- No text that names specific real people, real places, or sensitive topics.",
     "- No imagery related to weapons, violence, drugs, or anything explicit.",
     "- No NSFW content of any kind.",
     "",
     "Landscape composition. Render as a clean app window or full-bleed product screenshot.",
   ].join("\n");
+  return { prompt, styleName: style.name };
 }
 
 export type WireframeResult = { url: string; prompt: string };
@@ -55,7 +119,10 @@ export async function generateWireframe(
     return null;
   }
 
-  const prompt = buildWireframePrompt(appOneLiner);
+  const { prompt, styleName } = buildWireframePrompt(appOneLiner);
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`[imageGen] using style: ${styleName}`);
+  }
 
   // High-fidelity mockups take longer than sketches — give the call a
   // generous timeout. gpt-image-1 at high quality is typically 20–45s.

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HeaderBackdrop } from "@/components/HeaderBackdrop";
 
 export const metadata: Metadata = {
   title: "Resume",
@@ -34,14 +35,11 @@ export default function ResumePage() {
   return (
     <div>
       {/* HEADER */}
-      <section className="border-b border-ink/10">
-        <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 lg:grid-cols-[1.4fr_1fr] lg:px-10 lg:py-24">
+      <section className="relative border-b border-ink/10">
+        <HeaderBackdrop liftPx={120} />
+        <div className="relative mx-auto grid max-w-6xl gap-10 px-6 py-16 lg:grid-cols-[1.4fr_1fr] lg:items-center lg:px-10 lg:py-16">
           <div>
             <div className="flex items-center gap-3 text-ink-soft">
-              <span className="font-mono text-[11px] tracking-[0.2em] tabular">
-                № 03
-              </span>
-              <span className="h-px w-8 bg-ink/30" aria-hidden />
               <span className="label-eyebrow">Dossier</span>
             </div>
             <h1 className="h-display mt-7 text-[clamp(2.5rem,6vw,4.5rem)] text-ink">
@@ -49,9 +47,10 @@ export default function ResumePage() {
               <span className="display-italic text-forest">on the record.</span>
             </h1>
             <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-ink/85">
-              My professional background is focused on AI delivery, business
-              workflows, stakeholder alignment, and helping teams move from AI
-              ideas to usable products and measurable outcomes.
+              My professional background — eight years across data and AI
+              consulting — is focused on AI delivery, business workflows,
+              stakeholder alignment, and helping teams move from AI ideas
+              to usable products and measurable outcomes.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -76,7 +75,7 @@ export default function ResumePage() {
                 href="mailto:mpadden33@gmail.com"
                 className="inline-flex items-center gap-2 rounded-full bg-cream px-5 py-3 text-[13.5px] font-medium text-ink ring-1 ring-ink/30 transition-colors hover:ring-ink"
               >
-                <span className="ink-underline">Email</span>
+                <span className="ink-underline">mpadden33@gmail.com</span>
               </a>
             </div>
           </div>
@@ -88,35 +87,30 @@ export default function ResumePage() {
               target="_blank"
               rel="noreferrer"
               aria-label="Open Mike Padden's resume PDF"
-              className="group relative mx-auto block w-full max-w-sm rotate-[-1.5deg] rounded-md border border-ink/20 bg-cream-deep/80 p-6 shadow-[0_18px_48px_-24px_oklch(0.205_0.045_250/0.45)] transition-transform hover:-rotate-[0.5deg] hover:shadow-[0_22px_56px_-22px_oklch(0.205_0.045_250/0.55)]"
+              className="group relative mx-auto block w-full max-w-sm rotate-[-1.5deg] rounded-md border border-ink/20 bg-cream-deep/80 p-5 shadow-[0_18px_48px_-24px_oklch(0.205_0.045_250/0.45)] transition-transform hover:-rotate-[0.5deg] hover:shadow-[0_22px_56px_-22px_oklch(0.205_0.045_250/0.55)]"
             >
               <div className="absolute -top-2 left-6 h-1 w-12 rounded-sm bg-rust/80" aria-hidden />
-              <div className="flex items-center justify-between border-b border-ink/15 pb-3">
+              <div className="flex items-center justify-between border-b border-ink/15 pb-2.5">
                 <span className="label-eyebrow">PDF · 1 page</span>
-                <span className="font-mono text-[11px] text-ink-soft tabular">
+                <span className="font-mono text-[10.5px] text-ink-soft tabular">
                   MichaelPadden_Resume.pdf
                 </span>
               </div>
-              <div className="mt-4 space-y-2.5">
-                <div className="display-italic text-2xl text-ink leading-tight">
+              <div className="mt-3 space-y-2">
+                <div className="display-italic text-xl text-ink leading-tight">
                   Mike Padden
                 </div>
-                <div className="font-mono text-[11px] tracking-[0.18em] text-ink-soft uppercase">
+                <div className="font-mono text-[10.5px] tracking-[0.18em] text-ink-soft uppercase">
                   AI Delivery · Seattle
                 </div>
-                <div className="mt-4 space-y-1.5">
+                <div className="mt-3 space-y-1.5">
                   <div className="h-2 w-11/12 rounded-sm bg-ink/15" />
                   <div className="h-2 w-10/12 rounded-sm bg-ink/15" />
                   <div className="h-2 w-9/12 rounded-sm bg-ink/15" />
                   <div className="h-2 w-7/12 rounded-sm bg-ink/15" />
                 </div>
-                <div className="mt-5 space-y-1.5">
-                  <div className="h-1.5 w-full rounded-sm bg-ink/10" />
-                  <div className="h-1.5 w-11/12 rounded-sm bg-ink/10" />
-                  <div className="h-1.5 w-10/12 rounded-sm bg-ink/10" />
-                </div>
               </div>
-              <div className="mt-6 flex items-center justify-between border-t border-ink/10 pt-3 font-mono text-[10.5px] tracking-wide text-ink-soft">
+              <div className="mt-4 flex items-center justify-between border-t border-ink/10 pt-2.5 font-mono text-[10.5px] tracking-wide text-ink-soft">
                 <span>Open in a new tab</span>
                 <span aria-hidden className="transition-transform group-hover:translate-x-0.5">
                   ↗
